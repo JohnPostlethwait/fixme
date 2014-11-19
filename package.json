@@ -1,0 +1,42 @@
+{
+  "name": "fixme",
+  "description": "Scan for FIXME, TODO, HACK, and NOTE comments within your source, and print them to stdout.",
+  "version": "0.0.1",
+  "author": "John Postlethwait <john.postlethwait@gmail.com>",
+  "contributors": [],
+
+  "keywords": ["notes", "hack", "todo", "fixme"],
+
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/JohnPostlethwait/fixme.git"
+  },
+
+  "main": "./lib/fixme",
+  "preferGlobal": "true",
+  "bin": {
+    "fixme": "./bin/fixme"
+  },
+
+  "engines": {
+    "node": ">= v0.10.26"
+  },
+
+  "licenses": [
+    {
+      "name": "MIT",
+      "url": "http://opensource.org/licenses/mit-license.php"
+    }
+  ],
+
+  "dependencies": {
+    "byline":       "4.1.1",
+    "chalk":        "0.5.1",
+    "event-stream": "3.1.7",
+    "isbinaryfile": "2.0.2",
+    "minimatch":    "1.0.0",
+    "readdirp":     "1.1.0"
+  },
+
+  "devDependencies": {}
+}
