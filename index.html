@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Fixme by JohnPostlethwait</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Fixme</h1>
+        <p>Node module to scan for FIXME, TODO, HACK, OPTIMIZE, and NOTE comments within your source code, and print them to stdout.</p>
+        <p class="view"><a href="https://github.com/JohnPostlethwait/fixme">View the Project on GitHub <small>JohnPostlethwait/fixme</small></a></p>
+        <ul>
+          <li><a href="https://github.com/JohnPostlethwait/fixme/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/JohnPostlethwait/fixme/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/JohnPostlethwait/fixme">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="fixme" class="anchor" href="#fixme" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fixme</h1>
+
+<p>Node module to scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source code and print them to stdout. This is similar to the <code>rake notes</code> task from Rails.</p>
+
+<p>It ends up giving you an output like this:</p>
+
+<p><img src="http://i.imgur.com/OXsTtCZ.png" alt=""></p>
+
+<p>The color formatting is currently done using the excellent terminal coloring library <a href="https://www.npmjs.org/package/chalk">chalk</a>.</p>
+
+<p><em>Fixme currently scans your matching files line-by-line looking for annotations in the code. As such; multi-line annotation capturing is currently not supported. All annotations must be on the same line.</em></p>
+
+<h2>
+<a id="useage" class="anchor" href="#useage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Useage</h2>
+
+<p>In order to use Fixme all you need to do is install it:</p>
+
+<blockquote>
+<p>npm install -g fixme</p>
+</blockquote>
+
+<p><em>Note: There really shouldn't be much reason to globally install it...</em></p>
+
+<p>Require it:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> fixme <span class="pl-k">=</span> <span class="pl-s3">require</span>(<span class="pl-s1"><span class="pl-pds">'</span>fixme<span class="pl-pds">'</span></span>);</pre></div>
+
+<p>And finally; configure it when you call it:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-c">// All values below are Fixme default values unless otherwise overridden here.</span>
+fixme({
+  path<span class="pl-k">:</span>                 <span class="pl-sv">process</span>.cwd(),
+  ignored_directories<span class="pl-k">:</span>  [<span class="pl-s1"><span class="pl-pds">'</span>node_modules/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.git/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.hg/**<span class="pl-pds">'</span></span>],
+  file_patterns<span class="pl-k">:</span>        [<span class="pl-s1"><span class="pl-pds">'</span>**/*.js<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>Makefile<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>**/*.sh<span class="pl-pds">'</span></span>],
+  file_encoding<span class="pl-k">:</span>        <span class="pl-s1"><span class="pl-pds">'</span>utf8<span class="pl-pds">'</span></span>,
+  line_length_limit<span class="pl-k">:</span>    <span class="pl-c1">1000</span>
+});</pre></div>
+
+<p>You should then see some nice output when this is run:</p>
+
+<pre><code>• path/to/your/directory/file.js [4 messages]:
+  [Line   1]  ✐ NOTE: This is here because sometimes an intermittent issue appears.
+  [Line   7]  ↻ OPTIMIZE: This could be reqorked to not do a O(N2) lookup.
+  [Line   9]  ✓ TODO from John: Add a check here to ensure these are always strings.
+  [Line  24]  ✄ HACK: I am doing something here that is horrible, but it works for now...
+  [Line  89]  ✗ XXX: Let's do this better next time? It's bad.
+  [Line 136]  ☠ FIXME: We sometimes get an undefined index in this array.
+  [Line 211]  ☢ BUG: If the user inputs "Easter" we always output "Egg", even if they wanted a "Bunny".
+</code></pre>
+
+<h3>
+<a id="configure-options-in-more-detail" class="anchor" href="#configure-options-in-more-detail" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configure Options (In More Detail)</h3>
+
+<ul>
+<li>
+<strong>path:</strong> The path to scan through for notes, defaults to process.cwd()</li>
+<li>
+<strong>ignored_directories:</strong> Glob patterns for directories to ignore. Passes these straight to <a href="https://www.npmjs.org/package/minimatch">minimatch</a> so check there for more information on proper syntax.</li>
+<li>
+<strong>file_patterns:</strong> Glob patterns for files to scan. Also uses <a href="https://www.npmjs.org/package/minimatch">minimatch</a>.</li>
+<li>
+<strong>file_encoding:</strong> The encoding the files scanned will be opened as.</li>
+<li>
+<strong>line_length_limit:</strong> The number of max characters a line can be before Fixme gives up and doen not scan it for matches. If a line is too long, the regular expression will take an extremely long time to finish. <em>You have been warned!</em>
+</li>
+</ul>
+
+<h3>
+<a id="using-with-gulpjs" class="anchor" href="#using-with-gulpjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using With <a href="http://gulpjs.com/">GulpJS</a>
+</h3>
+
+<p>Using this as a GulpJS task is pretty simple, here is a very straight-forward "notes" task:</p>
+
+<div class="highlight highlight-javascript"><pre>gulp.task(<span class="pl-s1"><span class="pl-pds">'</span>notes<span class="pl-pds">'</span></span>, fixme);</pre></div>
+
+<p>That, of course, assumes all of the defaults in Fixme are ok with you. If not, this is still pretty simple to configure and run as a Gulp task:</p>
+
+<div class="highlight highlight-javascript"><pre>gulp.task(<span class="pl-s1"><span class="pl-pds">'</span>notes<span class="pl-pds">'</span></span>, <span class="pl-st">function</span> () {
+  fixme({
+    path<span class="pl-k">:</span>                 <span class="pl-sv">process</span>.cwd(),
+    ignored_directories<span class="pl-k">:</span>  [<span class="pl-s1"><span class="pl-pds">'</span>node_modules/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.git/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.hg/**<span class="pl-pds">'</span></span>],
+    file_patterns<span class="pl-k">:</span>        [<span class="pl-s1"><span class="pl-pds">'</span>**/*.js<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>Makefile<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>**/*.sh<span class="pl-pds">'</span></span>],
+    file_encoding<span class="pl-k">:</span>        <span class="pl-s1"><span class="pl-pds">'</span>utf8<span class="pl-pds">'</span></span>,
+    line_length_limit<span class="pl-k">:</span>    <span class="pl-c1">1000</span>
+  });
+});</pre></div>
+
+<h3>
+<a id="writing-comments-for-use-with-fixme" class="anchor" href="#writing-comments-for-use-with-fixme" aria-hidden="true"><span class="octicon octicon-link"></span></a>Writing Comments for Use With Fixme</h3>
+
+<p>A code annotation needs to follow these rules to be picked up by Fixme:</p>
+
+<ul>
+<li>Can be preceeded by 0 to n number of characters, this includes the comment characters // and /*</li>
+<li>Must have one of the words: NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, or BUG</li>
+<li>Can have 0 to n space characters</li>
+<li>Can have an author in parenthesis after the above word, and before a colon (:)</li>
+<li>Can have 0 to n space characters</li>
+<li>Must be followed by a colon (:)</li>
+<li>Can have 0 to n space characters</li>
+<li>Should have a message of 0 to n characters for the note</li>
+</ul>
+
+<h4>
+<a id="displaying-authors" class="anchor" href="#displaying-authors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Displaying Authors</h4>
+
+<p>You can have an author of a comment displayed via Fixme:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-c">// NOTE(John Postlethwait): This comment will be shown as a note, and have an author!</span></pre></div>
+
+<div class="highlight highlight-shell"><pre>  [Line 1]  ✐ NOTE from John Postlethwait: This comment will be shown as a note, and have an author<span class="pl-k">!</span></pre></div>
+
+<h4>
+<a id="more-examples" class="anchor" href="#more-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>More Examples</h4>
+
+<p>Take a look at the <code>test/annotation_test.js</code> file, all of those comments in there are supported and expected to parse with Fixme.</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/JohnPostlethwait">JohnPostlethwait</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
