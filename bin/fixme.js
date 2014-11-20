@@ -14,28 +14,28 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
     lineLengthLimit     = 1000,
     messageChecks       = {
       note: {
-        regex:    /.*(?:\/\/)\s*NOTE(.*):\s*(.+)*/,
-        label:    '✐ NOTE: ',
+        regex:    /.*\/\/\s*NOTE\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
+        label:    '✐ NOTE',
         colorer:  chalk.green
       },
       optimize: {
-        regex:    /.*(?:\/\/)\s*OPTIMIZE(.*):\s*(.+)*/,
-        label:    '↻ OPTIMIZE: ',
+        regex:    /.*\/\/\s*OPTIMIZE\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
+        label:    '↻ OPTIMIZE',
         colorer:  chalk.blue
       },
       todo: {
-        regex:    /.*(?:\/\/)\s*TODO(.*):\s*(.+)*/,
-        label:    '✓ TODO: ',
+        regex:    /.*\/\/\s*TODO\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
+        label:    '✓ TODO',
         colorer:  chalk.yellow
       },
       hack: {
-        regex:    /.*(?:\/\/)\s*HACK(.*):\s*(.+)*/,
-        label:    '✄ HACK: ',
+        regex:    /.*\/\/\s*HACK\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
+        label:    '✄ HACK',
         colorer:  chalk.magenta
       },
       fixme: {
-        regex:    /.*(?:\/\/)\s*FIXME(.*):\s*(.+)*/,
-        label:    '☠ FIXME: ',
+        regex:    /.*\/\/\s*FIXME\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
+        label:    '☠ FIXME',
         colorer:  chalk.red
       }
     };
@@ -118,8 +118,13 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
       thisMessage.label   = checker.label;
       thisMessage.colorer = checker.colorer;
 
-      if (matchResults[1]) thisMessage.author   = matchResults[1];
-      if (matchResults[2]) thisMessage.message  = matchResults[2];
+      if (matchResults[1] && matchResults[1].length) {
+        thisMessage.author = matchResults[1].trim();
+      }
+
+      if (matchResults[2] && matchResults[2].length) {
+        thisMessage.message = matchResults[2].trim();
+      }
     }
 
     if (thisMessage) messages.push(thisMessage);
@@ -164,10 +169,22 @@ function getPaddedLineNumber (lineNumber, totalLinesNumber) {
  */
 function formatMessageOutput (individualMessage, totalNumberOfLines) {
   var paddedLineNumber = getPaddedLineNumber(individualMessage.line_number, totalNumberOfLines),
+      finalLabelString,
       finalNoteString;
 
-  finalNoteString =   chalk.gray('    [Line ' + paddedLineNumber + '] ');
-  finalNoteString +=  chalk.bold(individualMessage.colorer(individualMessage.label));
+  finalNoteString = chalk.gray('  [Line ' + paddedLineNumber + '] ');
+
+  finalLabelString = individualMessage.label;
+
+  if (individualMessage.author) {
+    finalLabelString += (' from ' + individualMessage.author + ': ');
+  } else {
+    finalLabelString += ': ';
+  }
+
+  finalLabelString = chalk.bold(individualMessage.colorer(finalLabelString));
+
+  finalNoteString += finalLabelString;
 
   if (individualMessage.message && individualMessage.message.length) {
     finalNoteString += individualMessage.colorer(individualMessage.message);
@@ -189,7 +206,7 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
  * @return  {String}
  */
 function formatFilePathOutput (filePath, numberOfMessages) {
-  var filePathOutput = chalk.white('\n  • ' + filePath + ' '),
+  var filePathOutput = chalk.white('\n• ' + filePath + ' '),
       messagesString = 'messages';
 
   if (numberOfMessages === 1) {
@@ -264,7 +281,7 @@ function scanAndProcessMessages () {
           fileMessages.messages.push({
             message:      lengthError,
             line_number:  currentFileLineNumber,
-            label:        '⚠ WARNING: ',
+            label:        '⚠ WARNING',
             colorer:      chalk.underline.red
           });
         }
