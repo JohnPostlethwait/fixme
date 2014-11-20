@@ -12,11 +12,7 @@
     "url": "git://github.com/JohnPostlethwait/fixme.git"
   },
 
-  "main": "./lib/fixme",
-  "preferGlobal": "true",
-  "bin": {
-    "fixme": "./bin/fixme"
-  },
+  "main": "./index.js",
 
   "engines": {
     "node": ">= v0.10.26"
@@ -38,5 +34,7 @@
     "readdirp":     "1.1.0"
   },
 
-  "devDependencies": {}
+  "devDependencies": {
+
+  }
 }
