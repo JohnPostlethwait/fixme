@@ -1,6 +1,6 @@
 # Fixme #
 
-Node module to scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source code and print them to stdout. This is similar to the ```rake notes``` task from Rails.
+Scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source, and print them to stdout so you can deal with them. This is similar to the ```rake notes``` task from Rails.
 
 It ends up giving you an output like this:
 
