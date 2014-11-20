@@ -10,36 +10,46 @@ var byline        = require('byline'),
 
 var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
     filesToScan         = ['**/*.js', 'Makefile', '**/*.sh'],
+    scanPath            = process.cwd(),
     fileEncoding        = 'utf8',
     lineLengthLimit     = 1000,
     messageChecks       = {
       note: {
-        regex:    /.*\/\/\s*NOTE\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
-        label:    '✐ NOTE',
+        regex:    /.*NOTE\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        label:    ' ✐ NOTE',
         colorer:  chalk.green
       },
       optimize: {
-        regex:    /.*\/\/\s*OPTIMIZE\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
-        label:    '↻ OPTIMIZE',
+        regex:    /.*OPTIMIZE\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        label:    ' ↻ OPTIMIZE',
         colorer:  chalk.blue
       },
       todo: {
-        regex:    /.*\/\/\s*TODO\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
-        label:    '✓ TODO',
-        colorer:  chalk.yellow
-      },
-      hack: {
-        regex:    /.*\/\/\s*HACK\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
-        label:    '✄ HACK',
+        regex:    /.*TODO\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        label:    ' ✓ TODO',
         colorer:  chalk.magenta
       },
+      hack: {
+        regex:    /.*HACK\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        label:    ' ✄ HACK',
+        colorer:  chalk.yellow
+      },
+      xxx: {
+        regex:    /.*XXX\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        label:    ' ✗ XXX',
+        colorer:  chalk.black.bgYellow
+      },
       fixme: {
-        regex:    /.*\/\/\s*FIXME\s*(?:\(([^:]*)\))\s*:\s*(.*)/,
-        label:    '☠ FIXME',
+        regex:    /.*FIXME\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        label:    ' ☠ FIXME',
         colorer:  chalk.red
+      },
+      bug: {
+        regex:    /.*BUG\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        label:    ' ☢ BUG',
+        colorer:  chalk.white.bgRed
       }
     };
-
 
 /**
  * Determines whether or not to let the file through. by ensuring that the
@@ -206,7 +216,7 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
  * @return  {String}
  */
 function formatFilePathOutput (filePath, numberOfMessages) {
-  var filePathOutput = chalk.white('\n• ' + filePath + ' '),
+  var filePathOutput = chalk.bold.white('\n• ' + filePath + ' '),
       messagesString = 'messages';
 
   if (numberOfMessages === 1) {
@@ -245,7 +255,7 @@ function logMessages (messagesInfo) {
  */
 function scanAndProcessMessages () {
   var stream = readdirp({
-    root:       '../lighthouse',
+    root:       scanPath,
     fileFilter: fileFilterer
   });
 
@@ -281,7 +291,7 @@ function scanAndProcessMessages () {
           fileMessages.messages.push({
             message:      lengthError,
             line_number:  currentFileLineNumber,
-            label:        '⚠ WARNING',
+            label:        ' ⚠ SKIPPING CHECK',
             colorer:      chalk.underline.red
           });
         }
@@ -304,7 +314,7 @@ function scanAndProcessMessages () {
  * scanner to scan the files for messages.
  *
  * @param     {Object}  options
- * @property  {String}  options.path                Required. The base directory to recursively scan for messages.
+ * @property  {String}  options.path                The base directory to recursively scan for messages. Defaults to process.cwd()
  * @property  {Array}   options.ignored_directories An array of minimatch glob patterns for directories to ignore scanning entirely.
  * @property  {Array}   options.file_patterns       An array of minimatch glob patterns for files to scan for messages.
  * @property  {String}  options.file_encoding       The encoding the files scanned will be opened with, defaults to 'utf8'.
@@ -313,6 +323,10 @@ function scanAndProcessMessages () {
  // TODO(johnp): Allow custom messageChecks to be added via options.
 function parseUserOptionsAndScan (options) {
   if (options) {
+    if (options.path) {
+      scanPath = options.path;
+    }
+
     if (options.ignored_directories &&
         Array.isArray(options.ignored_directories) &&
         options.ignored_directories.length) {
@@ -332,8 +346,6 @@ function parseUserOptionsAndScan (options) {
     if (options.line_length_limit) {
       lineLengthLimit = options.line_length_limit;
     }
-  } else {
-    throw new Error('Options must be passed to FixMe with at least a `path` property.');
   }
 
   scanAndProcessMessages();

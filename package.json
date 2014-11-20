@@ -1,7 +1,7 @@
 {
   "name": "fixme",
   "description": "Scan for FIXME, TODO, HACK, and NOTE comments within your source, and print them to stdout.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "John Postlethwait <john.postlethwait@gmail.com>",
   "contributors": [],
 
