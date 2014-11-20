@@ -1,19 +1,14 @@
 # Fixme #
 
-Node module to scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG
-comments within your source code and print them to stdout. This is similar to
-the ```rake notes``` task from Rails.
+Node module to scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source code and print them to stdout. This is similar to the ```rake notes``` task from Rails.
 
 It ends up giving you an output like this:
 
 ![](http://i.imgur.com/OXsTtCZ.png)
 
-The color formatting is currently done using the excellent terminal coloring
-library [chalk](https://www.npmjs.org/package/chalk).
+The color formatting is currently done using the excellent terminal coloring library [chalk](https://www.npmjs.org/package/chalk).
 
-Fixme currently scans your matching files line-by-line looking for annotations
-in the code. As such; multi-line annotation capturing is currently not
-supported. All annotations must be on the same line.
+*Fixme currently scans your matching files line-by-line looking for annotations in the code. As such; multi-line annotation capturing is currently not supported. All annotations must be on the same line.*
 
 ## Useage ##
 
@@ -58,29 +53,20 @@ You should then see some nice output when this is run:
 ### Configure Options (In More Detail) ###
 
   * **path:** The path to scan through for notes, defaults to process.cwd()
-  * **ignored_directories:** Glob patterns for directories to ignore. Passes
-                             these straight to [minimatch](https://www.npmjs.org/package/minimatch)
-                             so check there for more information on proper
-                             syntax.
+  * **ignored_directories:** Glob patterns for directories to ignore. Passes these straight to [minimatch](https://www.npmjs.org/package/minimatch) so check there for more information on proper syntax.
   * **file_patterns:** Glob patterns for files to scan. Also uses [minimatch](https://www.npmjs.org/package/minimatch).
   * **file_encoding:** The encoding the files scanned will be opened as.
-  * **line_length_limit:** The number of max characters a line can be before
-                           Fixme gives up and doen not scan it for matches. If
-                           a line is too long, the regular expression will take
-                           an extremely long time to finish.
-                           *You have been warned!*
+  * **line_length_limit:** The number of max characters a line can be before Fixme gives up and doen not scan it for matches. If a line is too long, the regular expression will take an extremely long time to finish. *You have been warned!*
 
 ### Using With [GulpJS](http://gulpjs.com/) ###
 
-Using this as a GulpJS task is pretty simple, here is a very straight-forward
-"notes" task:
+Using this as a GulpJS task is pretty simple, here is a very straight-forward "notes" task:
 
 ```javascript
 gulp.task('notes', fixme);
 ```
 
-That, of course, assumes all of the defaults in Fixme are ok with you. If not,
-this is still pretty simple to configure and run as a Gulp task:
+That, of course, assumes all of the defaults in Fixme are ok with you. If not, this is still pretty simple to configure and run as a Gulp task:
 
 ```javascript
 gulp.task('notes', function () {
@@ -98,8 +84,7 @@ gulp.task('notes', function () {
 
 A code annotation needs to follow these rules to be picked up by Fixme:
 
-  * Can be preceeded by 0 to n number of characters, this includes the comment
-    characters // and /*
+  * Can be preceeded by 0 to n number of characters, this includes the comment characters // and /*
   * Must have one of the words: NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, or BUG
   * Can have 0 to n space characters
   * Can have an author in parenthesis after the above word, and before a colon (:)
@@ -122,5 +107,4 @@ You can have an author of a comment displayed via Fixme:
 
 #### More Examples ####
 
-Take a look at the ```test/annotation_test.js``` file, all of those comments
-in there are supported and expected to parse with Fixme.
+Take a look at the ```test/annotation_test.js``` file, all of those comments in there are supported and expected to parse with Fixme.
