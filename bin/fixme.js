@@ -15,37 +15,37 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
     lineLengthLimit     = 1000,
     messageChecks       = {
       note: {
-        regex:    /[\/\/][\/\*].*NOTE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*NOTE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✐ NOTE',
         colorer:  chalk.green
       },
       optimize: {
-        regex:    /[\/\/][\/\*].*OPTIMIZE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*OPTIMIZE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ↻ OPTIMIZE',
         colorer:  chalk.blue
       },
       todo: {
-        regex:    /[\/\/][\/\*].*TODO\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*TODO\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✓ TODO',
         colorer:  chalk.magenta
       },
       hack: {
-        regex:    /[\/\/][\/\*].*HACK\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*HACK\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✄ HACK',
         colorer:  chalk.yellow
       },
       xxx: {
-        regex:    /[\/\/][\/\*].*XXX\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*XXX\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✗ XXX',
         colorer:  chalk.black.bgYellow
       },
       fixme: {
-        regex:    /[\/\/][\/\*].*FIXME\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*FIXME\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ☠ FIXME',
         colorer:  chalk.red
       },
       bug: {
-        regex:    /[\/\/][\/\*].*BUG\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*BUG\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ☢ BUG',
         colorer:  chalk.white.bgRed
       }
