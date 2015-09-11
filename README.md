@@ -42,7 +42,7 @@ You should then see some nice output when this is run:
 ```
 • path/to/your/directory/file.js [4 messages]:
   [Line   1]  ✐ NOTE: This is here because sometimes an intermittent issue appears.
-  [Line   7]  ↻ OPTIMIZE: This could be reqorked to not do a O(N2) lookup.
+  [Line   7]  ↻ OPTIMIZE: This could be reworked to not do a O(N2) lookup.
   [Line   9]  ✓ TODO from John: Add a check here to ensure these are always strings.
   [Line  24]  ✄ HACK: I am doing something here that is horrible, but it works for now...
   [Line  89]  ✗ XXX: Let's do this better next time? It's bad.
