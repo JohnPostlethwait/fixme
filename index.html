@@ -1,36 +1,28 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Fixme by JohnPostlethwait</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Fixme</h1>
-        <p>Node module to scan for FIXME, TODO, HACK, OPTIMIZE, and NOTE comments within your source code, and print them to stdout.</p>
-        <p class="view"><a href="https://github.com/JohnPostlethwait/fixme">View the Project on GitHub <small>JohnPostlethwait/fixme</small></a></p>
-        <ul>
-          <li><a href="https://github.com/JohnPostlethwait/fixme/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/JohnPostlethwait/fixme/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/JohnPostlethwait/fixme">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
+    <section class="page-header">
+      <h1 class="project-name">Fixme</h1>
+      <h2 class="project-tagline">Node module to scan for FIXME, TODO, HACK, OPTIMIZE, and NOTE comments within your source code, and print them to stdout.</h2>
+      <a href="https://github.com/JohnPostlethwait/fixme" class="btn">View on GitHub</a>
+      <a href="https://github.com/JohnPostlethwait/fixme/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/JohnPostlethwait/fixme/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
 <a id="fixme" class="anchor" href="#fixme" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fixme</h1>
 
-<p>Node module to scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source code and print them to stdout. This is similar to the <code>rake notes</code> task from Rails.</p>
+<p>Scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source, and print them to stdout so you can deal with them. This is similar to the <code>rake notes</code> task from Rails.</p>
 
 <p>It ends up giving you an output like this:</p>
 
@@ -53,16 +45,16 @@
 
 <p>Require it:</p>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> fixme <span class="pl-k">=</span> <span class="pl-s3">require</span>(<span class="pl-s1"><span class="pl-pds">'</span>fixme<span class="pl-pds">'</span></span>);</pre></div>
+<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> fixme <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>fixme<span class="pl-pds">'</span></span>);</pre></div>
 
 <p>And finally; configure it when you call it:</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-c">// All values below are Fixme default values unless otherwise overridden here.</span>
 fixme({
-  path<span class="pl-k">:</span>                 <span class="pl-sv">process</span>.cwd(),
-  ignored_directories<span class="pl-k">:</span>  [<span class="pl-s1"><span class="pl-pds">'</span>node_modules/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.git/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.hg/**<span class="pl-pds">'</span></span>],
-  file_patterns<span class="pl-k">:</span>        [<span class="pl-s1"><span class="pl-pds">'</span>**/*.js<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>Makefile<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>**/*.sh<span class="pl-pds">'</span></span>],
-  file_encoding<span class="pl-k">:</span>        <span class="pl-s1"><span class="pl-pds">'</span>utf8<span class="pl-pds">'</span></span>,
+  path<span class="pl-k">:</span>                 <span class="pl-c1">process</span>.cwd(),
+  ignored_directories<span class="pl-k">:</span>  [<span class="pl-s"><span class="pl-pds">'</span>node_modules/**<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>.git/**<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>.hg/**<span class="pl-pds">'</span></span>],
+  file_patterns<span class="pl-k">:</span>        [<span class="pl-s"><span class="pl-pds">'</span>**/*.js<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Makefile<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>**/*.sh<span class="pl-pds">'</span></span>],
+  file_encoding<span class="pl-k">:</span>        <span class="pl-s"><span class="pl-pds">'</span>utf8<span class="pl-pds">'</span></span>,
   line_length_limit<span class="pl-k">:</span>    <span class="pl-c1">1000</span>
 });</pre></div>
 
@@ -70,7 +62,7 @@ fixme({
 
 <pre><code>• path/to/your/directory/file.js [4 messages]:
   [Line   1]  ✐ NOTE: This is here because sometimes an intermittent issue appears.
-  [Line   7]  ↻ OPTIMIZE: This could be reqorked to not do a O(N2) lookup.
+  [Line   7]  ↻ OPTIMIZE: This could be reworked to not do a O(N2) lookup.
   [Line   9]  ✓ TODO from John: Add a check here to ensure these are always strings.
   [Line  24]  ✄ HACK: I am doing something here that is horrible, but it works for now...
   [Line  89]  ✗ XXX: Let's do this better next time? It's bad.
@@ -101,16 +93,16 @@ fixme({
 
 <p>Using this as a GulpJS task is pretty simple, here is a very straight-forward "notes" task:</p>
 
-<div class="highlight highlight-javascript"><pre>gulp.task(<span class="pl-s1"><span class="pl-pds">'</span>notes<span class="pl-pds">'</span></span>, fixme);</pre></div>
+<div class="highlight highlight-javascript"><pre>gulp.task(<span class="pl-s"><span class="pl-pds">'</span>notes<span class="pl-pds">'</span></span>, fixme);</pre></div>
 
 <p>That, of course, assumes all of the defaults in Fixme are ok with you. If not, this is still pretty simple to configure and run as a Gulp task:</p>
 
-<div class="highlight highlight-javascript"><pre>gulp.task(<span class="pl-s1"><span class="pl-pds">'</span>notes<span class="pl-pds">'</span></span>, <span class="pl-st">function</span> () {
+<div class="highlight highlight-javascript"><pre>gulp.task(<span class="pl-s"><span class="pl-pds">'</span>notes<span class="pl-pds">'</span></span>, <span class="pl-k">function</span> () {
   fixme({
-    path<span class="pl-k">:</span>                 <span class="pl-sv">process</span>.cwd(),
-    ignored_directories<span class="pl-k">:</span>  [<span class="pl-s1"><span class="pl-pds">'</span>node_modules/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.git/**<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>.hg/**<span class="pl-pds">'</span></span>],
-    file_patterns<span class="pl-k">:</span>        [<span class="pl-s1"><span class="pl-pds">'</span>**/*.js<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>Makefile<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>**/*.sh<span class="pl-pds">'</span></span>],
-    file_encoding<span class="pl-k">:</span>        <span class="pl-s1"><span class="pl-pds">'</span>utf8<span class="pl-pds">'</span></span>,
+    path<span class="pl-k">:</span>                 <span class="pl-c1">process</span>.cwd(),
+    ignored_directories<span class="pl-k">:</span>  [<span class="pl-s"><span class="pl-pds">'</span>node_modules/**<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>.git/**<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>.hg/**<span class="pl-pds">'</span></span>],
+    file_patterns<span class="pl-k">:</span>        [<span class="pl-s"><span class="pl-pds">'</span>**/*.js<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Makefile<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>**/*.sh<span class="pl-pds">'</span></span>],
+    file_encoding<span class="pl-k">:</span>        <span class="pl-s"><span class="pl-pds">'</span>utf8<span class="pl-pds">'</span></span>,
     line_length_limit<span class="pl-k">:</span>    <span class="pl-c1">1000</span>
   });
 });</pre></div>
@@ -144,13 +136,15 @@ fixme({
 <a id="more-examples" class="anchor" href="#more-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>More Examples</h4>
 
 <p>Take a look at the <code>test/annotation_test.js</code> file, all of those comments in there are supported and expected to parse with Fixme.</p>
-      </section>
-    </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/JohnPostlethwait">JohnPostlethwait</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/JohnPostlethwait/fixme">Fixme</a> is maintained by <a href="https://github.com/JohnPostlethwait">JohnPostlethwait</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
   </body>
 </html>
