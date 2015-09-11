@@ -15,37 +15,37 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
     lineLengthLimit     = 1000,
     messageChecks       = {
       note: {
-        regex:    /.*NOTE\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        regex:    /[\/\/][\/\*]\s*NOTE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✐ NOTE',
         colorer:  chalk.green
       },
       optimize: {
-        regex:    /.*OPTIMIZE\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        regex:    /[\/\/][\/\*]\s*OPTIMIZE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ↻ OPTIMIZE',
         colorer:  chalk.blue
       },
       todo: {
-        regex:    /.*TODO\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        regex:    /[\/\/][\/\*]\s*TODO\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✓ TODO',
         colorer:  chalk.magenta
       },
       hack: {
-        regex:    /.*HACK\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        regex:    /[\/\/][\/\*]\s*HACK\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✄ HACK',
         colorer:  chalk.yellow
       },
       xxx: {
-        regex:    /.*XXX\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        regex:    /[\/\/][\/\*]\s*XXX\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✗ XXX',
         colorer:  chalk.black.bgYellow
       },
       fixme: {
-        regex:    /.*FIXME\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        regex:    /[\/\/][\/\*]\s*FIXME\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ☠ FIXME',
         colorer:  chalk.red
       },
       bug: {
-        regex:    /.*BUG\s*(?:\(([^:]*)\))*\s*:\s*(.*)/,
+        regex:    /[\/\/][\/\*]\s*BUG\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ☢ BUG',
         colorer:  chalk.white.bgRed
       }
@@ -97,12 +97,12 @@ function fileFilterer (fileInformation) {
  * Takes a line of a file and the line number, and returns an array of all of
  * the messages found in that line. Can return multiple messages per line, for
  * example, if a message was annotated with more than one type. EG: FIXME TODO
- * 
+ *
  * Each message in the array will have a label, a line_number, a colorer, and a
  * message. Will also include an author property if one is found on the
  * message.
  *
- * @param   {String} lineString The 
+ * @param   {String} lineString The
  * @param   {Number} lineNumber
  *
  * @return  {Array}
@@ -216,7 +216,7 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
  * @return  {String}
  */
 function formatFilePathOutput (filePath, numberOfMessages) {
-  var filePathOutput = chalk.bold.white('\n• ' + filePath + ' '),
+  var filePathOutput = chalk.bold.white('\n* ' + filePath + ' '),
       messagesString = 'messages';
 
   if (numberOfMessages === 1) {
@@ -267,39 +267,41 @@ function scanAndProcessMessages () {
   stream
     .pipe(eventStream.map(function (fileInformation, callback) {
       var input                 = fs.createReadStream(fileInformation.fullPath, { encoding: fileEncoding }),
-          lineStream            = byline.createStream(input, { encoding: fileEncoding }),
+          // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
           fileMessages          = { path: null, total_lines: 0, messages: [] },
           currentFileLineNumber = 1;
 
       fileMessages.path = fileInformation.path;
 
-      lineStream.on('data', function (fileLineString) {
-        var messages,
-            lengthError;
+      input.pipe( eventStream.split() )
+        .pipe( eventStream.map( function( fileLineString, cb ){
+          var messages,
+              lengthError;
 
-        if (fileLineString.length < lineLengthLimit) {
-          messages = retrieveMessagesFromLine(fileLineString, currentFileLineNumber);
+          if (fileLineString.length < lineLengthLimit) {
+            messages = retrieveMessagesFromLine(fileLineString, currentFileLineNumber);
 
-          messages.forEach(function (message) {
-            fileMessages.messages.push(message);
-          });
-        } else {
-          lengthError = 'Fixme is skipping this line because its length is ' +
-                        'greater than the maximum line-length of ' +
-                        lineLengthLimit + '.';
+            messages.forEach(function (message) {
+              fileMessages.messages.push(message);
+            });
+          } else {
+            lengthError = 'Fixme is skipping this line because its length is ' +
+                          'greater than the maximum line-length of ' +
+                          lineLengthLimit + '.';
 
-          fileMessages.messages.push({
-            message:      lengthError,
-            line_number:  currentFileLineNumber,
-            label:        ' ⚠ SKIPPING CHECK',
-            colorer:      chalk.underline.red
-          });
-        }
+            fileMessages.messages.push({
+              message:      lengthError,
+              line_number:  currentFileLineNumber,
+              label:        ' ⚠ SKIPPING CHECK',
+              colorer:      chalk.underline.red
+            });
+          }
 
-        currentFileLineNumber += 1;
-      });
+          currentFileLineNumber += 1;
+        })
+      );
 
-      lineStream.on('end', function () {
+      input.on('end', function () {
         fileMessages.total_lines = currentFileLineNumber;
 
         logMessages(fileMessages);
