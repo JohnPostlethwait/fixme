@@ -341,8 +341,6 @@
          * @property  {Number}  options.line_length_limit   The number of characters a line can be before it is ignored. Defaults to 1000.
          */
 
-
-        var color = !callback;
         if (options) {
 
             if (options.path) {
