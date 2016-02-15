@@ -4,38 +4,48 @@
   "version": "0.3.0",
   "author": "John Postlethwait <john.postlethwait@gmail.com>",
   "website": "http://johnpostlethwait.github.io/fixme",
+  "bin": {
+    "fixme": "bin/fixme.js"
+  },
+  "scripts": {
+    "fixme" : "node bin/fixme.js",
+    "start" : "node bin/fixme.js",
+    "test": "mocha --reporter spec test/fixme.test.js"
+  },
   "contributors": [],
-
-  "keywords": ["notes", "hack", "todo", "fixme", "annotate", "optimize"],
-
+  "keywords": [
+    "notes",
+    "hack",
+    "todo",
+    "fixme",
+    "annotate",
+    "optimize"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/JohnPostlethwait/fixme.git"
   },
-
   "main": "./index.js",
-
   "engines": {
     "node": ">= v0.10.26"
   },
-
   "licenses": [
     {
       "name": "MIT",
       "url": "http://opensource.org/licenses/mit-license.php"
     }
   ],
-
   "dependencies": {
-    "byline":       "4.2.0",
-    "chalk":        "0.5.1",
-    "event-stream": "3.1.7",
-    "isbinaryfile": "2.0.2",
-    "minimatch":    "1.0.0",
-    "readdirp":     "1.1.0"
+    "byline": "4.x.x",
+    "chalk": "1.x.x",
+    "event-stream": "3.x.x",
+    "isbinaryfile": "2.x.x",
+    "minimatch": "3.x.x",
+    "readdirp": "2.x.x",
+    "strip-ansi": "^3.0.0"
   },
-
   "devDependencies": {
-
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
   }
 }

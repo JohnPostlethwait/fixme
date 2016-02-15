@@ -1,54 +1,59 @@
+#!/usr/bin/env node
 'use strict';
 
-var byline        = require('byline'),
-    chalk         = require('chalk'),
-    eventStream   = require('event-stream'),
-    fs            = require('fs'),
-    isBinaryFile  = require('isbinaryfile'),
-    minimatch     = require('minimatch'),
-    readdirp      = require('readdirp');
+var byline = require('byline'),
+    chalk = require('chalk'),
+    eventStream = require('event-stream'),
+    fs = require('fs'),
+    os = require('os'),
+    isBinaryFile = require('isbinaryfile'),
+    minimatch = require('minimatch'),
+    readdirp = require('readdirp'),
+//TODO: get rid of this dirty hack (removing the color codes aterwards)
+    stripAnsi = require('strip-ansi');
 
-var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
-    filesToScan         = ['**/*.js', 'Makefile', '**/*.sh'],
-    scanPath            = process.cwd(),
-    fileEncoding        = 'utf8',
-    lineLengthLimit     = 1000,
-    messageChecks       = {
-      note: {
-        regex:    /[\/\/][\/\*]\s*NOTE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✐ NOTE',
-        colorer:  chalk.green
-      },
-      optimize: {
-        regex:    /[\/\/][\/\*]\s*OPTIMI(Z|S)E\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ↻ OPTIMIZE',
-        colorer:  chalk.blue
-      },
-      todo: {
-        regex:    /[\/\/][\/\*]\s*TODO\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✓ TODO',
-        colorer:  chalk.magenta
-      },
-      hack: {
-        regex:    /[\/\/][\/\*]\s*HACK\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✄ HACK',
-        colorer:  chalk.yellow
-      },
-      xxx: {
-        regex:    /[\/\/][\/\*]\s*XXX\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✗ XXX',
-        colorer:  chalk.black.bgYellow
-      },
-      fixme: {
-        regex:    /[\/\/][\/\*]\s*FIXME\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ☠ FIXME',
-        colorer:  chalk.red
-      },
-      bug: {
-        regex:    /[\/\/][\/\*]\s*BUG\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ☢ BUG',
-        colorer:  chalk.white.bgRed
-      }
+var ignoredDirectories = ['vendors/**', 'vendor/**', 'bower_components/**', 'jspm_packages/**', 'node_modules/**', '.git/**', '.hg/**'],
+    filesToScan = ['**/*.js', 'Makefile', '**/*.sh'],
+    scanPath = process.cwd(),
+    color = false,
+    fileEncoding = 'utf8',
+    lineLengthLimit = 1000,
+    messageChecks = {
+        note: {
+            regex: /[\/\/][\/\*]\s*NOTE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            label: ' ✐ NOTE',
+            colorer: chalk.green
+        },
+        optimize: {
+            regex: /[\/\/][\/\*]\s*OPTIMI(Z|S)E\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            label: ' ↻ OPTIMIZE',
+            colorer: chalk.blue
+        },
+        todo: {
+            regex: /[\/\/][\/\*]\s*TODO\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            label: ' ✓ TODO',
+            colorer: chalk.magenta
+        },
+        hack: {
+            regex: /[\/\/][\/\*]\s*HACK\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            label: ' ✄ HACK',
+            colorer: chalk.yellow
+        },
+        xxx: {
+            regex: /[\/\/][\/\*]\s*XXX\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            label: ' ✗ XXX',
+            colorer: chalk.black.bgYellow
+        },
+        fixme: {
+            regex: /[\/\/][\/\*]\s*FIXME\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            label: ' ☠ FIXME',
+            colorer: chalk.red
+        },
+        bug: {
+            regex: /[\/\/][\/\*]\s*BUG\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            label: ' ☢ BUG',
+            colorer: chalk.white.bgRed
+        }
     };
 
 /**
@@ -65,32 +70,32 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
  * @return  {Boolean}
  */
 // TODO: This could be simpler using minimatch negation patterns in one set, instead disparate ones for files and directories.
-function fileFilterer (fileInformation) {
-  var shouldIgnoreDirectory = false,
-      shouldIgnoreFile      = true,
-      letTheFileThrough;
+function fileFilterer(fileInformation) {
+    var shouldIgnoreDirectory = false,
+        shouldIgnoreFile = true,
+        letTheFileThrough;
 
-  ignoredDirectories.forEach(function (directoryPattern) {
-    if (shouldIgnoreDirectory) return;
-    shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern);
-  });
-
-  if (!shouldIgnoreDirectory) {
-    filesToScan.forEach(function (filePattern) {
-      if (!shouldIgnoreFile) return;
-
-      shouldIgnoreFile = !(minimatch(fileInformation.name, filePattern));
+    ignoredDirectories.forEach(function (directoryPattern) {
+        if (shouldIgnoreDirectory) return;
+        shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern);
     });
-  }
 
-  letTheFileThrough = !(shouldIgnoreDirectory || (!shouldIgnoreDirectory && shouldIgnoreFile));
+    if (!shouldIgnoreDirectory) {
+        filesToScan.forEach(function (filePattern) {
+            if (!shouldIgnoreFile) return;
 
-  // Never let binary files through, searching them for comments will make no sense...
-  if (letTheFileThrough && isBinaryFile(fileInformation.fullPath)) {
-    letTheFileThrough = false;
-  }
+            shouldIgnoreFile = !(minimatch(fileInformation.name, filePattern));
+        });
+    }
 
-  return letTheFileThrough;
+    letTheFileThrough = !(shouldIgnoreDirectory || (!shouldIgnoreDirectory && shouldIgnoreFile));
+
+    // Never let binary files through, searching them for comments will make no sense...
+    if (letTheFileThrough && isBinaryFile(fileInformation.fullPath)) {
+        letTheFileThrough = false;
+    }
+
+    return letTheFileThrough;
 }
 
 /**
@@ -107,40 +112,40 @@ function fileFilterer (fileInformation) {
  *
  * @return  {Array}
  */
-function retrieveMessagesFromLine (lineString, lineNumber) {
-  var messageFormat = {
-    author:       null,
-    message:      null,
-    label:        null,
-    colorer:      null,
-    line_number:  lineNumber
-  },
-  messages = [];
+function retrieveMessagesFromLine(lineString, lineNumber) {
+    var messageFormat = {
+            author: null,
+            message: null,
+            label: null,
+            colorer: null,
+            line_number: lineNumber
+        },
+        messages = [];
 
-  Object.keys(messageChecks).forEach(function (checkName) {
-    var matchResults  = lineString.match(messageChecks[checkName].regex),
-        checker       = messageChecks[checkName],
-        thisMessage;
+    Object.keys(messageChecks).forEach(function (checkName) {
+        var matchResults = lineString.match(messageChecks[checkName].regex),
+            checker = messageChecks[checkName],
+            thisMessage;
 
-    if (matchResults && matchResults.length) {
-      thisMessage = JSON.parse(JSON.stringify(messageFormat)); // Clone the above structure.
+        if (matchResults && matchResults.length) {
+            thisMessage = JSON.parse(JSON.stringify(messageFormat)); // Clone the above structure.
 
-      thisMessage.label   = checker.label;
-      thisMessage.colorer = checker.colorer;
+            thisMessage.label = checker.label;
+            thisMessage.colorer = checker.colorer;
 
-      if (matchResults[1] && matchResults[1].length) {
-        thisMessage.author = matchResults[1].trim();
-      }
+            if (matchResults[1] && matchResults[1].length) {
+                thisMessage.author = matchResults[1].trim();
+            }
 
-      if (matchResults[2] && matchResults[2].length) {
-        thisMessage.message = matchResults[2].trim();
-      }
-    }
+            if (matchResults[2] && matchResults[2].length) {
+                thisMessage.message = matchResults[2].trim();
+            }
+        }
 
-    if (thisMessage) messages.push(thisMessage);
-  });
+        if (thisMessage) messages.push(thisMessage);
+    });
 
-  return messages;
+    return messages;
 }
 
 /**
@@ -153,14 +158,14 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
  *
  * @return  {String}
  */
-function getPaddedLineNumber (lineNumber, totalLinesNumber) {
-  var paddedLineNumberString = '' + lineNumber;
+function getPaddedLineNumber(lineNumber, totalLinesNumber) {
+    var paddedLineNumberString = '' + lineNumber;
 
-  while (paddedLineNumberString.length < ('' + totalLinesNumber).length) {
-    paddedLineNumberString = ' ' + paddedLineNumberString;
-  }
+    while (paddedLineNumberString.length < ('' + totalLinesNumber).length) {
+        paddedLineNumberString = ' ' + paddedLineNumberString;
+    }
 
-  return paddedLineNumberString;
+    return paddedLineNumberString;
 }
 
 /**
@@ -177,32 +182,32 @@ function getPaddedLineNumber (lineNumber, totalLinesNumber) {
  *
  * @return    {String}    The formatted message string.
  */
-function formatMessageOutput (individualMessage, totalNumberOfLines) {
-  var paddedLineNumber = getPaddedLineNumber(individualMessage.line_number, totalNumberOfLines),
-      finalLabelString,
-      finalNoteString;
+function formatMessageOutput(individualMessage, totalNumberOfLines) {
+    var paddedLineNumber = getPaddedLineNumber(individualMessage.line_number, totalNumberOfLines),
+        finalLabelString,
+        finalNoteString;
 
-  finalNoteString = chalk.gray("\t"+'[Line ' + paddedLineNumber + '] ');
+    finalNoteString = chalk.gray('[' + paddedLineNumber + '] ');
 
-  finalLabelString = individualMessage.label;
+    finalLabelString = individualMessage.label;
 
-  if (individualMessage.author) {
-    finalLabelString += (' from ' + individualMessage.author + ': ');
-  } else {
-    finalLabelString += ': ';
-  }
+    if (individualMessage.author) {
+        finalLabelString += (' from ' + individualMessage.author + ': ');
+    } else {
+        finalLabelString += ': ';
+    }
 
-  finalLabelString = chalk.bold(individualMessage.colorer(finalLabelString));
+    finalLabelString = chalk.bold(individualMessage.colorer(finalLabelString));
 
-  finalNoteString += finalLabelString;
+    finalNoteString += finalLabelString;
 
-  if (individualMessage.message && individualMessage.message.length) {
-    finalNoteString += individualMessage.colorer(individualMessage.message);
-  } else {
-    finalNoteString += chalk.grey('[[no message to display]]');
-  }
+    if (individualMessage.message && individualMessage.message.length) {
+        finalNoteString += individualMessage.colorer(individualMessage.message);
+    } else {
+        finalNoteString += chalk.grey('[[no message to display]]');
+    }
 
-  return finalNoteString;
+    return finalNoteString;
 }
 
 /**
@@ -215,17 +220,17 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
  *
  * @return  {String}
  */
-function formatFilePathOutput (filePath, numberOfMessages) {
-  var filePathOutput = chalk.bold.white('\n* ' + filePath + ' '),
-      messagesString = 'messages';
+function formatFilePathOutput(filePath, numberOfMessages) {
+    var filePathOutput = chalk.bold.white(os.EOL+'* ' + filePath + ' '),
+        messagesString = 'messages';
 
-  if (numberOfMessages === 1) {
-    messagesString = 'message';
-  }
+    if (numberOfMessages === 1) {
+        messagesString = 'message';
+    }
 
-  filePathOutput += chalk.grey('[' + numberOfMessages + ' ' + messagesString + ']:');
+    filePathOutput += chalk.grey('[' + numberOfMessages + ' ' + messagesString + ']:');
 
-  return filePathOutput;
+    return filePathOutput;
 }
 
 /**
@@ -238,119 +243,144 @@ function formatFilePathOutput (filePath, numberOfMessages) {
  * @property  {Array}   messagesInfo.messages All of the message objects for the file.
  * @property  {String}  messagesInfo.total_lines Total number of lines in the file.
  */
-function logMessages (messagesInfo) {
-  if (messagesInfo.messages.length) {
-    console.log(formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length));
-
-    messagesInfo.messages.forEach(function (message) {
-      var formattedMessage = formatMessageOutput(message, messagesInfo.total_lines);
-
-      console.log(formattedMessage);
-    });
-  }
+function logMessages(messagesInfo) {
+    if (messagesInfo.messages.length) {
+        var result = '';
+        var file = formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length);
+        //TODO: we could use a stream here and make it the alternative to console
+        console.log(file);
+        result += file + os.EOL;
+        messagesInfo.messages.forEach(function (message) {
+            var formattedMessage = formatMessageOutput(message, messagesInfo.total_lines);
+            console.log(formattedMessage);
+            result += formattedMessage + os.EOL;
+        });
+        return result;
+    }
+    return null;
 }
 
 /**
  * Reads through the configured path scans the matching files for messages.
  */
-function scanAndProcessMessages () {
-  var stream = readdirp({
-    root:       scanPath,
-    fileFilter: fileFilterer
-  });
+function scanAndProcessMessages(cb) {
+    var stream = readdirp({
+        root: scanPath,
+        fileFilter: fileFilterer
+    });
 
-  // TODO: Actually do something meaningful/useful with these handlers.
-  stream
-    .on('warn', console.warn)
-    .on('error', console.error);
+    // TODO: Actually do something meaningful/useful with these handlers.
+    stream
+        .on('warn', console.warn)
+        .on('error', console.error);
 
-  stream
-    .pipe(eventStream.map(function (fileInformation, callback) {
-      var input                 = fs.createReadStream(fileInformation.fullPath, { encoding: fileEncoding }),
-          // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
-          fileMessages          = { path: null, total_lines: 0, messages: [] },
-          currentFileLineNumber = 1;
+    stream
+        .pipe(eventStream.map(function (fileInformation, callback) {
+            var input = fs.createReadStream(fileInformation.fullPath, {encoding: fileEncoding}),
+            // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
+                fileMessages = {path: null, total_lines: 0, messages: []},
+                currentFileLineNumber = 1;
 
-      fileMessages.path = fileInformation.path;
+            fileMessages.path = fileInformation.path;
 
-      input.pipe( eventStream.split() )
-        .pipe( eventStream.map( function( fileLineString, cb ){
-          var messages,
-              lengthError;
+            input.pipe(eventStream.split())
+                .pipe(eventStream.map(function (fileLineString) {
+                        var messages,
+                            lengthError;
 
-          if (fileLineString.length < lineLengthLimit) {
-            messages = retrieveMessagesFromLine(fileLineString, currentFileLineNumber);
+                        if (fileLineString.length < lineLengthLimit) {
+                            messages = retrieveMessagesFromLine(fileLineString, currentFileLineNumber);
 
-            messages.forEach(function (message) {
-              fileMessages.messages.push(message);
+                            messages.forEach(function (message) {
+                                fileMessages.messages.push(message);
+                            });
+                        } else {
+                            lengthError = 'Fixme is skipping this line because its length is ' +
+                                'greater than the maximum line-length of ' +
+                                lineLengthLimit + '.';
+
+                            fileMessages.messages.push({
+                                message: lengthError,
+                                line_number: currentFileLineNumber,
+                                label: ' ⚠ SKIPPING CHECK',
+                                colorer: chalk.underline.red
+                            });
+                        }
+
+                        currentFileLineNumber += 1;
+                    })
+                );
+
+            input.on('end', function () {
+                fileMessages.total_lines = currentFileLineNumber;
+
+                var output = logMessages(fileMessages);
+                cb(output);
             });
-          } else {
-            lengthError = 'Fixme is skipping this line because its length is ' +
-                          'greater than the maximum line-length of ' +
-                          lineLengthLimit + '.';
 
-            fileMessages.messages.push({
-              message:      lengthError,
-              line_number:  currentFileLineNumber,
-              label:        ' ⚠ SKIPPING CHECK',
-              colorer:      chalk.underline.red
-            });
-          }
-
-          currentFileLineNumber += 1;
-        })
-      );
-
-      input.on('end', function () {
-        fileMessages.total_lines = currentFileLineNumber;
-
-        logMessages(fileMessages);
-      });
-
-      callback();
-    }));
+            callback();
+        }));
 }
 
 /**
  * Takes an options object and over-writes the defaults, then calls off to the
  * scanner to scan the files for messages.
  *
- * @param     {Object}  options
+ * @param     {Object=}  options                    Optional options
+ * @param     {function=} callback                  Optional callback, takes the output as parameter
+ * @property  {String}  [options.color=true]        Whether to return ANSI Color Codes in the callback or not. Defaults to false without callback, else to true.
  * @property  {String}  options.path                The base directory to recursively scan for messages. Defaults to process.cwd()
  * @property  {Array}   options.ignored_directories An array of minimatch glob patterns for directories to ignore scanning entirely.
  * @property  {Array}   options.file_patterns       An array of minimatch glob patterns for files to scan for messages.
  * @property  {String}  options.file_encoding       The encoding the files scanned will be opened with, defaults to 'utf8'.
  * @property  {Number}  options.line_length_limit   The number of characters a line can be before it is ignored. Defaults to 1000.
  */
- // TODO(johnp): Allow custom messageChecks to be added via options.
-function parseUserOptionsAndScan (options) {
-  if (options) {
-    if (options.path) {
-      scanPath = options.path;
+// TODO(johnp): Allow custom messageChecks to be added via options.
+function parseUserOptionsAndScan(options, callback) {
+    color = !callback;
+    if (options) {
+
+        if (options.color) {
+            color = options.color;
+        }
+
+        if (options.path) {
+            scanPath = options.path;
+        }
+
+        if (options.ignored_directories &&
+            Array.isArray(options.ignored_directories) &&
+            options.ignored_directories.length) {
+            ignoredDirectories = options.ignored_directories;
+        }
+
+        if (options.file_patterns &&
+            Array.isArray(options.file_patterns) &&
+            options.file_patterns.length) {
+            filesToScan = options.file_patterns;
+        }
+
+        if (options.file_encoding) {
+            fileEncoding = options.file_encoding;
+        }
+
+        if (options.line_length_limit) {
+            lineLengthLimit = options.line_length_limit;
+        }
     }
 
-    if (options.ignored_directories &&
-        Array.isArray(options.ignored_directories) &&
-        options.ignored_directories.length) {
-      ignoredDirectories = options.ignored_directories;
-    }
-
-    if (options.file_patterns &&
-        Array.isArray(options.file_patterns) &&
-        options.file_patterns.length) {
-      filesToScan = options.file_patterns;
-    }
-
-    if (options.file_encoding) {
-      fileEncoding = options.file_encoding;
-    }
-
-    if (options.line_length_limit) {
-      lineLengthLimit = options.line_length_limit;
-    }
-  }
-
-  scanAndProcessMessages();
+    scanAndProcessMessages(function (out) {
+        if (callback) {
+            //used to generate the test files - uncomment and run "mocha fixme.test.js" in test directory. Verify the output!!!
+            //fs.writeFileSync('fixme.withoutcolor.' + (os.EOL === "\r\n" ? 'crlf' : 'lf') + '.txt', stripAnsi(out), 'utf8');
+            //fs.writeFileSync('fixme.withcolor.' + (os.EOL === "\r\n" ? 'crlf' : 'lf') + '.txt', out, 'utf8');
+            if (color) callback(out);
+            else callback(stripAnsi(out));
+        }
+    });
 }
 
-module.exports = parseUserOptionsAndScan;
+if (!module.parent)
+    parseUserOptionsAndScan();
+else
+    module.exports = parseUserOptionsAndScan;
