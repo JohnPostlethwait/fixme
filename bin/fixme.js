@@ -20,7 +20,7 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
         colorer:  chalk.green
       },
       optimize: {
-        regex:    /[\/\/][\/\*]\s*OPTIMIZE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /[\/\/][\/\*]\s*OPTIMI(Z|S)E\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ↻ OPTIMIZE',
         colorer:  chalk.blue
       },
@@ -182,7 +182,7 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
       finalLabelString,
       finalNoteString;
 
-  finalNoteString = chalk.gray('  [Line ' + paddedLineNumber + '] ');
+  finalNoteString = chalk.gray("\t"+'[Line ' + paddedLineNumber + '] ');
 
   finalLabelString = individualMessage.label;
 
