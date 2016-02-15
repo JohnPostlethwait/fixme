@@ -248,7 +248,6 @@ function logMessages(messagesInfo) {
         var result = '';
         var file = formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length);
         //TODO: we could use a stream here and make it the alternative to console
-        console.log(file);
         result += file + os.EOL;
         messagesInfo.messages.forEach(function (message) {
             var formattedMessage = formatMessageOutput(message, messagesInfo.total_lines);
