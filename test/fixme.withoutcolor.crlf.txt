@@ -1,5 +1,5 @@
 
-* annotation_test.js [7 messages]:
+* test\annotation_test.js [7 messages]:
 [1]  ✐ NOTE: This is the sample output for a note!
 [2]  ↻ OPTIMIZE from Z: John Postlethwait
 [3]  ✓ TODO: This is the sample output for a todo!
