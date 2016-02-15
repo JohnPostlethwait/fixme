@@ -25,7 +25,7 @@ var ignoredDirectories = ['vendors/**', 'vendor/**', 'bower_components/**', 'jsp
             colorer: chalk.green
         },
         optimize: {
-            regex: /[\/\/][\/\*]\s*OPTIMI(Z|S)E\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+            regex: /[\/\/][\/\*]\s*OPTIMI[ZS]E\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
             label: ' ↻ OPTIMIZE',
             colorer: chalk.blue
         },
