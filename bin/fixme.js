@@ -191,7 +191,7 @@
                 finalLabelString,
                 finalNoteString;
 
-            finalNoteString = (options&&options.md ? "\t\t" : '') + chalk.gray('[' + paddedLineNumber + '] ');
+            finalNoteString = (options&&options.md ? "* " : '  ') + chalk.gray('[' + paddedLineNumber + '] ');
 
             finalLabelString = individualMessage.label;
 
@@ -211,7 +211,7 @@
                 finalNoteString += chalk.grey('[[no message to display]]');
             }
 
-            return finalNoteString;
+            return finalNoteString + (options&&options.md ? "  " : '') ;
         };
 
         /**
@@ -225,7 +225,7 @@
          * @return  {String}
          */
         var formatFilePathOutput = function(filePath, numberOfMessages) {
-            var filePathOutput = chalk.bold.white(os.EOL + '* ' + filePath + ' '),
+            var filePathOutput = chalk.bold.white(os.EOL + (options&&options.md ? '### ' : '* ') + filePath + ' '),
                 messagesString = 'messages';
 
             if (numberOfMessages === 1) {

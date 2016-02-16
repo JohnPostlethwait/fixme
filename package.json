@@ -8,8 +8,8 @@
     "fixme": "bin/fixme.js"
   },
   "scripts": {
-    "fixme" : "node bin/fixme.js",
-    "start" : "node bin/fixme.js",
+    "fixme": "node bin/fixme.js",
+    "start": "node bin/fixme.js",
     "test": "mocha --reporter spec test/fixme.test.js"
   },
   "contributors": [],
@@ -36,6 +36,7 @@
     }
   ],
   "dependencies": {
+    "ansi-to-html": "^0.3.0",
     "byline": "4.x.x",
     "chalk": "1.x.x",
     "event-stream": "3.x.x",
