@@ -10,7 +10,8 @@
   "scripts": {
     "fixme": "node bin/fixme.js",
     "start": "node bin/fixme.js",
-    "test": "mocha --reporter spec test/fixme.test.js"
+    "test": "mocha --reporter spec test/fixme.test.js",
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec && node node_modules/opn-cli/cli.js coverage/lcov-report/index.html"
   },
   "contributors": [],
   "keywords": [
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "opn-cli": "^3.1.0"
   }
 }

@@ -17,4 +17,5 @@ fixme({
     console.log(out);
     //console.log(convert.toHtml(out));
     fs.writeFileSync(path.join(__dirname,'out.md'),convert.toHtml(out),'utf8');
+    fs.writeFileSync(path.join(__dirname,'out.raw.md'),out,'utf8');
 });

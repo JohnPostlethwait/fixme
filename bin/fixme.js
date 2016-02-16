@@ -253,7 +253,7 @@
                 var file = formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length);
                 //TODO: we could use a stream here and make it the alternative to console
                 if (!callback) console.log(file);
-                result += file + os.EOL+ os.EOL;
+                result += file + (options&&options.md ? os.EOL+os.EOL : os.EOL);
                     messagesInfo.messages.forEach(function (message) {
                     var formattedMessage = formatMessageOutput(message, messagesInfo.total_lines);
                     if (!callback) console.log(formattedMessage);
