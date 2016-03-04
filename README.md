@@ -10,7 +10,7 @@ The color formatting is currently done using the excellent terminal coloring lib
 
 *Fixme currently scans your matching files line-by-line looking for annotations in the code. As such; multi-line annotation capturing is currently not supported. All annotations must be on the same line.*
 
-## Useage ##
+## Usage ##
 
 In order to use Fixme all you need to do is install it:
 
