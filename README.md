@@ -1,6 +1,6 @@
 # Fixme #
 
-Scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source, and print them to stdout so you can deal with them. This is similar to the ```rake notes``` task from Rails.
+Scan for NOTE, OPTIMIZE, OPTIMISE, TODO, HACK, XXX, FIXME, and BUG comments within your source, and print them to stdout so you can deal with them. This is similar to the ```rake notes``` task from Rails.
 
 It ends up giving you an output like this:
 
@@ -16,28 +16,49 @@ In order to use Fixme all you need to do is install it:
 
 > npm install -g fixme
 
-*Note: There really shouldn't be much reason to globally install it...*
+###CLI Usage:
 
-Require it:
+Typing 
+
+> fixme
+
+in a directroy will search all `.js` files in all subdirectories except some preconfigured once _(vendors/**, vendor/**, bower_components/**, jspm_packages/**, node_modules/**)_
+
+Note: Passing custom options from the command line is currently not supported.
+
+### Programmatic Usage
+
+When using it **programtically**
+
+_like so:_
 
 ```javascript
 var fixme = require('fixme');
 ```
 
-And finally; configure it when you call it:
+the follwing options can be configured:
 
 ```javascript
 // All values below are Fixme default values unless otherwise overridden here.
-fixme({
+var options = {
   path:                 process.cwd(),
   ignored_directories:  ['node_modules/**', '.git/**', '.hg/**'],
   file_patterns:        ['**/*.js', 'Makefile', '**/*.sh'],
   file_encoding:        'utf8',
-  line_length_limit:    1000
+  line_length_limit:    1000,
+  color:                true
+};
+```
+
+when called like so:
+
+```javascript
+fixme(options, function(outptu){ 
+    console.log(output) 
 });
 ```
 
-You should then see some nice output when this is run:
+you should then see some nice output, when run:
 
 ```
 • path/to/your/directory/file.js [4 messages]:
@@ -49,6 +70,8 @@ You should then see some nice output when this is run:
   [Line 136]  ☠ FIXME: We sometimes get an undefined index in this array.
   [Line 211]  ☢ BUG: If the user inputs "Easter" we always output "Egg", even if they wanted a "Bunny".
 ```
+
+Note: `fixme(options, callback)` returns no value. Both, the option parameter and the callback functions are optional. 
 
 ### Configure Options (In More Detail) ###
 

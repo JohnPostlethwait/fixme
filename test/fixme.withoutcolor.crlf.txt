@@ -1,0 +1,10 @@
+
+* test\annotation_test.js   [8 messages]:
+  [1]  ✐ NOTE: This is the sample output for a note!
+  [2]  ➴ OPTIMIZE from John Postlethwait: This is the sample output for an optimize with an author!
+  [3]  ➴ OPTIMIZE from John Postlethwait: This is the sample output for an optimize with an author!
+  [4]  ✓ TODO: This is the sample output for a todo!
+  [5]  ✄ HACK: This is the sample output for a hack! Don't commit hacks!
+  [6]  ✗ XXX: This is the sample output for a XXX! XXX's need attention too!
+  [7]  ☠ FIXME from John Postlethwait: This is the sample output for a fixme! Seriously fix this...
+  [8]  ☢ BUG: This is the sample output for a bug! Who checked in a bug?!

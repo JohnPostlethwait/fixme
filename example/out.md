@@ -1,0 +1,13 @@
+<b><span style="color:#AAA">
+### annotation_test.js <span style="color:#FFF"><span style="color:#555">  [8 messages]:<span style="color:#FFF">
+
+* <span style="color:#555">[1] <span style="color:#FFF"><b><span style="color:#0A0"> ✐ NOTE: <span style="color:#FFF"><span style="color:#0A0">This is the sample output for a note!<span style="color:#FFF">  
+* <span style="color:#555">[2] <span style="color:#FFF"><b><span style="color:#55F"> ↻ OPTIMIZE from John Postlethwait: <span style="color:#FFF"><span style="color:#55F">This is the sample output for an optimize with an author!<span style="color:#FFF">  
+* <span style="color:#555">[3] <span style="color:#FFF"><b><span style="color:#55F"> ↻ OPTIMIZE from John Postlethwait: <span style="color:#FFF"><span style="color:#55F">This is the sample output for an optimize with an author!<span style="color:#FFF">  
+* <span style="color:#555">[4] <span style="color:#FFF"><b><span style="color:#A0A"> ✓ TODO: <span style="color:#FFF"><span style="color:#A0A">This is the sample output for a todo!<span style="color:#FFF">  
+* <span style="color:#555">[5] <span style="color:#FFF"><b><span style="color:#A50"> ✄ HACK: <span style="color:#FFF"><span style="color:#A50">This is the sample output for a hack! Don't commit hacks!<span style="color:#FFF">  
+* <span style="color:#555">[6] <span style="color:#FFF"><b><span style="color:#000"><span style="background-color:#A50"> ✗ XXX: <span style="background-color:#000"><span style="color:#FFF"><span style="color:#000"><span style="background-color:#A50">This is the sample output for a XXX! XXX's need attention too!<span style="background-color:#000"><span style="color:#FFF">  
+* <span style="color:#555">[7] <span style="color:#FFF"><b><span style="color:#A00"> ☠ FIXME from John Postlethwait: <span style="color:#FFF"><span style="color:#A00">This is the sample output for a fixme! Seriously fix this...<span style="color:#FFF">  
+* <span style="color:#555">[8] <span style="color:#FFF"><b><span style="color:#AAA"><span style="background-color:#A00"> ☢ BUG: <span style="background-color:#000"><span style="color:#FFF"><span style="color:#AAA"><span style="background-color:#A00">This is the sample output for a bug! Who checked in a bug?!<span style="background-color:#000"><span style="color:#FFF">  
+
+</span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></b></span></span></span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></b></span></span></span></span></span></span></b></span></span></span></span></span></span></b></span></span></span></span></span></span></b></span></span></span></span></span></span></b></span></span></span></span></span></span></b>

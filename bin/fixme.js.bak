@@ -28,7 +28,7 @@
                     label: ' ✐ NOTE',
                     colorer: chalk.green
                 },
-                //note: replaced icon - seems to be missing on windows latin/ german language settings in my editor (ultraedit studio)
+                //replaced icon - seems to be missing on windows latin/ german language settings in my editor (ultraedit studio)
                 //todo: find a better one!
                 optimize: {
                     regex: /[\/\/][\/\*]\s*OPTIMI[ZS]E\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
