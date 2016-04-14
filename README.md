@@ -58,6 +58,12 @@ You should then see some nice output when this is run:
   * **file_encoding:** The encoding the files scanned will be opened as.
   * **line_length_limit:** The number of max characters a line can be before Fixme gives up and doen not scan it for matches. If a line is too long, the regular expression will take an extremely long time to finish. *You have been warned!*
 
+### CLI Usage ###
+
+```sh
+fixme --help
+```
+
 ### Using With [GulpJS](http://gulpjs.com/) ###
 
 Using this as a GulpJS task is pretty simple, here is a very straight-forward "notes" task:

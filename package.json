@@ -15,6 +15,10 @@
 
   "main": "./index.js",
 
+  "bin": {
+    "fixme": "bin/cli"
+  },
+
   "engines": {
     "node": ">= v0.10.26"
   },
@@ -32,6 +36,7 @@
     "event-stream": "3.1.7",
     "isbinaryfile": "2.0.2",
     "minimatch":    "1.0.0",
+    "minimist":     "1.2.0",
     "readdirp":     "1.1.0"
   },
 
