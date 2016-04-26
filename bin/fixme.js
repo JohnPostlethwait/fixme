@@ -72,7 +72,7 @@ function fileFilterer (fileInformation) {
 
   ignoredDirectories.forEach(function (directoryPattern) {
     if (shouldIgnoreDirectory) return;
-    shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern);
+    shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern, { dot: true });
   });
 
   if (!shouldIgnoreDirectory) {
