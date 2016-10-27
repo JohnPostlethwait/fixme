@@ -2,6 +2,8 @@
 
 _**NOTE:** I no longer actively maintain this package. I'd love to get PRs to keep it going though!_
 
+![Fixme](https://nodei.co/npm/fixme.png "Fixme on NPM")
+
 Scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source, and print them to stdout so you can deal with them. This is similar to the ```rake notes``` task from Rails.
 
 It ends up giving you an output like this:

@@ -86,7 +86,7 @@ function fileFilterer (fileInformation) {
   letTheFileThrough = !(shouldIgnoreDirectory || (!shouldIgnoreDirectory && shouldIgnoreFile));
 
   // Never let binary files through, searching them for comments will make no sense...
-  if (letTheFileThrough && isBinaryFile(fileInformation.fullPath)) {
+  if (letTheFileThrough && isBinaryFile.sync(fileInformation.fullPath)) {
     letTheFileThrough = false;
   }
 
