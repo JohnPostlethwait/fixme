@@ -64,7 +64,7 @@ You should then see some nice output when this is run:
   * **line_length_limit:** The number of max characters a line can be before Fixme gives up and doen not scan it for matches. If a line is too long, the regular expression will take an extremely long time to finish. *You have been warned!*
   * **skip:** List of check names to skip. Valid options: `note`, `optimize`, `todo`, `hack`, `xxx`, `fixme`, `bug`, `line`. `line` will disable the line length warning.
 
-## CLI Usage ###
+### CLI Usage ###
 
 ```sh
 fixme --help
