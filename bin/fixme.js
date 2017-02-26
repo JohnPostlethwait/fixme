@@ -13,6 +13,7 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
     scanPath            = process.cwd(),
     fileEncoding        = 'utf8',
     lineLengthLimit     = 1000,
+    skipChecks          = [],
     messageChecks       = {
       note: {
         regex:    /[\/\/][\/\*]\s*NOTE\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
@@ -259,6 +260,11 @@ function scanAndProcessMessages () {
     fileFilter: fileFilterer
   });
 
+  // Remove skipped checks for our mapping
+  skipChecks.forEach(function (checkName) {
+    delete messageChecks[checkName];
+  });
+
   // TODO: Actually do something meaningful/useful with these handlers.
   stream
     .on('warn', console.warn)
@@ -284,7 +290,7 @@ function scanAndProcessMessages () {
             messages.forEach(function (message) {
               fileMessages.messages.push(message);
             });
-          } else {
+          } else if (skipChecks.indexOf('line') === -1){
             lengthError = 'Fixme is skipping this line because its length is ' +
                           'greater than the maximum line-length of ' +
                           lineLengthLimit + '.';
@@ -321,6 +327,7 @@ function scanAndProcessMessages () {
  * @property  {Array}   options.file_patterns       An array of minimatch glob patterns for files to scan for messages.
  * @property  {String}  options.file_encoding       The encoding the files scanned will be opened with, defaults to 'utf8'.
  * @property  {Number}  options.line_length_limit   The number of characters a line can be before it is ignored. Defaults to 1000.
+ * @property  {Array}   options.skip                An array of names of checks to skip.
  */
  // TODO(johnp): Allow custom messageChecks to be added via options.
 function parseUserOptionsAndScan (options) {
@@ -347,6 +354,12 @@ function parseUserOptionsAndScan (options) {
 
     if (options.line_length_limit) {
       lineLengthLimit = options.line_length_limit;
+    }
+
+    if (options.skip &&
+        Array.isArray(options.skip) &&
+        options.skip.length) {
+      skipChecks = options.skip;
     }
   }
 
