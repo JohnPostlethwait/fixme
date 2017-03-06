@@ -15,6 +15,10 @@
 
   "main": "./index.js",
 
+  "scripts": {
+    "test" : "node test/annotation_test.js"
+  },
+
   "bin": {
     "fixme": "bin/cli"
   },
