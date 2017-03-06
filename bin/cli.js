@@ -18,6 +18,7 @@ Options:\n\
   -i, --ignored_directories  glob patterns for directories to ignore (default: node_modules/**, .git/**, .hg/**)\n\
   -e, --file_encoding        file encoding to be scanned (default: utf8)\n\
   -l, --line_length_limit    number of max characters a line (default: 1000)\n\
+  -s, --skip                 list of checks to skip (default: none)\n\
 \n\
 Examples:\n\
 \n\
@@ -71,6 +72,14 @@ if (file_encoding) {
 var line_length_limit = argv.line_length_limit || argv.l;
 if (line_length_limit) {
   options.line_length_limit = line_length_limit;
+}
+
+var skip = argv.skip || argv.s;
+if (typeof skip === 'string') {
+  skip = [skip];
+}
+if (skip) {
+  options.skip = skip;
 }
 
 fixme(options);
