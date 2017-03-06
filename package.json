@@ -1,7 +1,7 @@
 {
   "name": "fixme",
   "description": "Scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source, and print them to stdout so you can deal with them.",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "author": "John Postlethwait <john.postlethwait@gmail.com>",
   "website": "http://johnpostlethwait.github.io/fixme",
   "contributors": [],
