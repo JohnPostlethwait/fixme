@@ -9,7 +9,7 @@
 // The next line is just a URL
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1399196
 
-require('../bin/fixme')({
+require('../bin/fixme')({ // NOTE: It doesn't need to be placed at line start!
   path:                 process.cwd(),
   ignored_directories:  ['node_modules/**', '.git/**'],
   file_patterns:        ['**/annotation_test.js'],
