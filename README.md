@@ -97,6 +97,7 @@ gulp.task('notes', function () {
 A code annotation needs to follow these rules to be picked up by Fixme:
 
   * Can be preceeded by 0 to n number of characters, this includes the comment characters // and /*
+  * Must not have colon (:) before the comment character //
   * Must have one of the words: NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, or BUG
   * Can have 0 to n space characters
   * Can have an author in parenthesis after the above word, and before a colon (:)
