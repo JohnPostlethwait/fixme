@@ -80,7 +80,7 @@ function fileFilterer (fileInformation) {
     filesToScan.forEach(function (filePattern) {
       if (!shouldIgnoreFile) return;
 
-      shouldIgnoreFile = !(minimatch(fileInformation.name, filePattern));
+      shouldIgnoreFile = !(minimatch(fileInformation.path, filePattern));
     });
   }
 
