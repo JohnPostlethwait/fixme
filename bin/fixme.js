@@ -16,37 +16,37 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
     skipChecks          = [],
     messageChecks       = {
       note: {
-        regex:    /(?:^|[^:])\/[/*]\s*NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✐ NOTE',
         colorer:  chalk.green
       },
       optimize: {
-        regex:    /(?:^|[^:])\/[/*]\s*OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ↻ OPTIMIZE',
         colorer:  chalk.blue
       },
       todo: {
-        regex:    /(?:^|[^:])\/[/*]\s*TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✓ TODO',
         colorer:  chalk.magenta
       },
       hack: {
-        regex:    /(?:^|[^:])\/[/*]\s*HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✄ HACK',
         colorer:  chalk.yellow
       },
       xxx: {
-        regex:    /(?:^|[^:])\/[/*]\s*XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ✗ XXX',
         colorer:  chalk.black.bgYellow
       },
       fixme: {
-        regex:    /(?:^|[^:])\/[/*]\s*FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ☠ FIXME',
         colorer:  chalk.red
       },
       bug: {
-        regex:    /(?:^|[^:])\/[/*]\s*BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
         label:    ' ☢ BUG',
         colorer:  chalk.white.bgRed
       }
@@ -118,6 +118,8 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
   },
   messages = [];
 
+  lineString = removeCommentEnd(lineString, ['-->', '#}}', '*/', '--}}', '}}'], '');
+
   Object.keys(messageChecks).forEach(function (checkName) {
     var matchResults  = lineString.match(messageChecks[checkName].regex),
         checker       = messageChecks[checkName],
@@ -129,12 +131,12 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
       thisMessage.label   = checker.label;
       thisMessage.colorer = checker.colorer;
 
-      if (matchResults[1] && matchResults[1].length) {
-        thisMessage.author = matchResults[1].trim();
+      if (matchResults[3] && matchResults[3].length) {
+        thisMessage.author = matchResults[3].trim();
       }
 
-      if (matchResults[2] && matchResults[2].length) {
-        thisMessage.message = matchResults[2].trim();
+      if (matchResults[4] && matchResults[4].length) {
+        thisMessage.message = matchResults[4].trim();
       }
     }
 
@@ -142,6 +144,23 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
   });
 
   return messages;
+}
+
+/**
+ * Removes the end of html, twig and handlebar comments. EG: -->, --}}, etc.
+ *
+ * @param   {String} str
+ * @param   {Array} find
+ * @param   {String} replace
+ *
+ * @return  {String}
+ */
+function removeCommentEnd(str, find, replace) {
+  var replaceString = str;
+  for (var i = 0; i < find.length; i++) {
+    replaceString = replaceString.replace(find[i], replace);
+  }
+  return replaceString;
 }
 
 /**
