@@ -5,6 +5,7 @@
 // XXX: This is the sample output for a XXX! XXX's need attention too!
 // FIXME (John Postlethwait): This is the sample output for a fixme! Seriously fix this...
 // BUG: This is the sample output for a bug! Who checked in a bug?!
+/* BUG: This is the sample output for a bug! Who checked in a bug?! */
 
 // The next line is just a URL
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1399196
