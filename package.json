@@ -35,12 +35,12 @@
   ],
   "dependencies": {
     "byline": "5.0.0",
-    "chalk": "2.4.0",
-    "event-stream": "3.3.4",
-    "isbinaryfile": "3.0.2",
+    "chalk": "4.0.0",
+    "event-stream": "4.0.1",
+    "isbinaryfile": "4.0.6",
     "minimatch": "3.0.4",
-    "minimist": "1.2.0",
-    "readdirp": "2.1.0"
+    "minimist": "1.2.5",
+    "readdirp": "3.4.0"
   },
   "devDependencies": {}
 }
