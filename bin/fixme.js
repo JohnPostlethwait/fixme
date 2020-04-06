@@ -118,7 +118,7 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
   },
   messages = [];
 
-  lineString = removeCommentEnd(lineString, ['-->', '#}}', '*/', '--}}', '}}'], '');
+  lineString = removeCommentEnd(lineString, ['-->', '#}}', '*/', '--}}', '}}', '#}'], '');
 
   Object.keys(messageChecks).forEach(function (checkName) {
     var matchResults  = lineString.match(messageChecks[checkName].regex),
