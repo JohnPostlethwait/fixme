@@ -87,7 +87,7 @@ function fileFilterer (fileInformation) {
   letTheFileThrough = !(shouldIgnoreDirectory || (!shouldIgnoreDirectory && shouldIgnoreFile));
 
   // Never let binary files through, searching them for comments will make no sense...
-  if (letTheFileThrough && isBinaryFile.sync(fileInformation.fullPath)) {
+  if (letTheFileThrough && isBinaryFile.isBinaryFileSync(fileInformation.fullPath)) {
     letTheFileThrough = false;
   }
 
@@ -118,7 +118,7 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
   },
   messages = [];
 
-  lineString = removeCommentEnd(lineString, ['-->', '#}}', '*/', '--}}', '}}'], '');
+  lineString = removeCommentEnd(lineString, ['-->', '#}}', '*/', '--}}', '}}', '#}'], '');
 
   Object.keys(messageChecks).forEach(function (checkName) {
     var matchResults  = lineString.match(messageChecks[checkName].regex),
@@ -274,8 +274,7 @@ function logMessages (messagesInfo) {
  * Reads through the configured path scans the matching files for messages.
  */
 function scanAndProcessMessages () {
-  var stream = readdirp({
-    root:       scanPath,
+  var stream = readdirp(scanPath, {
     fileFilter: fileFilterer
   });
 
