@@ -22,6 +22,8 @@ annotation = open_comment, whitespace, verb, whitespace,
 
 In addition, a `close_comment` character must match the corresponding `open_comment` character. The corresponding close character for `//` is a `newline`, so `newline`s may not be included within the annotation. Annotations may contain no text but must be properly closed.
 
+See [comments.js](bin/comments.js) for the full list of `open_comment`/`close_comment` pair synonyms.
+
 # 3. Examples
 
 The following are examples of valid annotations:
