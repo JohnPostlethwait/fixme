@@ -19,7 +19,8 @@
   },
   "main": "./index.js",
   "scripts": {
-    "test": "node test/annotation_test.js"
+    "test": "node test/annotation_test.js",
+    "lint": "eslint --cache ."
   },
   "bin": {
     "fixme": "bin/cli"
@@ -42,5 +43,7 @@
     "minimist": "1.2.5",
     "readdirp": "3.4.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint": "^7.30.0"
+  }
 }

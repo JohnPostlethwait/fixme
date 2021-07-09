@@ -1,56 +1,56 @@
 'use strict';
 
-var byline        = require('byline'),
-    chalk         = require('chalk'),
-    eventStream   = require('event-stream'),
-    fs            = require('fs'),
-    isBinaryFile  = require('isbinaryfile'),
-    minimatch     = require('minimatch'),
-    readdirp      = require('readdirp');
+const byline       = require('byline');
+const chalk        = require('chalk');
+const eventStream  = require('event-stream');
+const fs           = require('fs');
+const isBinaryFile = require('isbinaryfile');
+const minimatch    = require('minimatch');
+const readdirp     = require('readdirp');
 
-var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
-    filesToScan         = ['**/*.js', 'Makefile', '**/*.sh'],
-    scanPath            = process.cwd(),
-    fileEncoding        = 'utf8',
-    lineLengthLimit     = 1000,
-    skipChecks          = [],
-    messageChecks       = {
-      note: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✐ NOTE',
-        colorer:  chalk.green
-      },
-      optimize: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ↻ OPTIMIZE',
-        colorer:  chalk.blue
-      },
-      todo: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✓ TODO',
-        colorer:  chalk.magenta
-      },
-      hack: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✄ HACK',
-        colorer:  chalk.yellow
-      },
-      xxx: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✗ XXX',
-        colorer:  chalk.black.bgYellow
-      },
-      fixme: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ☠ FIXME',
-        colorer:  chalk.red
-      },
-      bug: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ☢ BUG',
-        colorer:  chalk.white.bgRed
-      }
-    };
+let ignoredDirectories = ['node_modules/**', '.git/**', '.hg/**'];
+let filesToScan        = ['**/*.js', 'Makefile', '**/*.sh'];
+let scanPath           = process.cwd();
+let fileEncoding       = 'utf8';
+let lineLengthLimit    = 1000;
+let skipChecks         = [];
+let messageChecks      = {
+  note: {
+    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    label:    ' ✐ NOTE',
+    colorer:  chalk.green
+  },
+  optimize: {
+    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    label:    ' ↻ OPTIMIZE',
+    colorer:  chalk.blue
+  },
+  todo: {
+    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    label:    ' ✓ TODO',
+    colorer:  chalk.magenta
+  },
+  hack: {
+    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    label:    ' ✄ HACK',
+    colorer:  chalk.yellow
+  },
+  xxx: {
+    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    label:    ' ✗ XXX',
+    colorer:  chalk.black.bgYellow
+  },
+  fixme: {
+    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    label:    ' ☠ FIXME',
+    colorer:  chalk.red
+  },
+  bug: {
+    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    label:    ' ☢ BUG',
+    colorer:  chalk.white.bgRed
+  }
+};
 
 /**
  * Determines whether or not to let the file through. by ensuring that the
@@ -67,9 +67,9 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
  */
 // TODO: This could be simpler using minimatch negation patterns in one set, instead disparate ones for files and directories.
 function fileFilterer (fileInformation) {
-  var shouldIgnoreDirectory = false,
-      shouldIgnoreFile      = true,
-      letTheFileThrough;
+  let shouldIgnoreDirectory = false;
+  let shouldIgnoreFile      = true;
+  let letTheFileThrough = true;
 
   ignoredDirectories.forEach(function (directoryPattern) {
     if (shouldIgnoreDirectory) return;
@@ -109,21 +109,21 @@ function fileFilterer (fileInformation) {
  * @return  {Array}
  */
 function retrieveMessagesFromLine (lineString, lineNumber) {
-  var messageFormat = {
-    author:       null,
-    message:      null,
-    label:        null,
-    colorer:      null,
-    line_number:  lineNumber
-  },
-  messages = [];
+  const messageFormat = {
+    author:      null,
+    message:     null,
+    label:       null,
+    colorer:     null,
+    line_number: lineNumber
+  };
+  const messages = [];
 
   lineString = removeCommentEnd(lineString, ['-->', '#}}', '*/', '--}}', '}}', '#}'], '');
 
   Object.keys(messageChecks).forEach(function (checkName) {
-    var matchResults  = lineString.match(messageChecks[checkName].regex),
-        checker       = messageChecks[checkName],
-        thisMessage;
+    let matchResults  = lineString.match(messageChecks[checkName].regex),
+      checker       = messageChecks[checkName],
+      thisMessage;
 
     if (matchResults && matchResults.length) {
       thisMessage = JSON.parse(JSON.stringify(messageFormat)); // Clone the above structure.
@@ -156,8 +156,8 @@ function retrieveMessagesFromLine (lineString, lineNumber) {
  * @return  {String}
  */
 function removeCommentEnd(str, find, replace) {
-  var replaceString = str;
-  for (var i = 0; i < find.length; i++) {
+  let replaceString = str;
+  for (let i = 0; i < find.length; i++) {
     replaceString = replaceString.replace(find[i], replace);
   }
   return replaceString;
@@ -174,7 +174,7 @@ function removeCommentEnd(str, find, replace) {
  * @return  {String}
  */
 function getPaddedLineNumber (lineNumber, totalLinesNumber) {
-  var paddedLineNumberString = '' + lineNumber;
+  let paddedLineNumberString = '' + lineNumber;
 
   while (paddedLineNumberString.length < ('' + totalLinesNumber).length) {
     paddedLineNumberString = ' ' + paddedLineNumberString;
@@ -198,9 +198,9 @@ function getPaddedLineNumber (lineNumber, totalLinesNumber) {
  * @return    {String}    The formatted message string.
  */
 function formatMessageOutput (individualMessage, totalNumberOfLines) {
-  var paddedLineNumber = getPaddedLineNumber(individualMessage.line_number, totalNumberOfLines),
-      finalLabelString,
-      finalNoteString;
+  let paddedLineNumber = getPaddedLineNumber(individualMessage.line_number, totalNumberOfLines),
+    finalLabelString,
+    finalNoteString;
 
   finalNoteString = chalk.gray('  [Line ' + paddedLineNumber + '] ');
 
@@ -236,8 +236,8 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
  * @return  {String}
  */
 function formatFilePathOutput (filePath, numberOfMessages) {
-  var filePathOutput = chalk.bold.white('\n* ' + filePath + ' '),
-      messagesString = 'messages';
+  let filePathOutput = chalk.bold.white('\n* ' + filePath + ' '),
+    messagesString = 'messages';
 
   if (numberOfMessages === 1) {
     messagesString = 'message';
@@ -263,7 +263,7 @@ function logMessages (messagesInfo) {
     console.log(formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length));
 
     messagesInfo.messages.forEach(function (message) {
-      var formattedMessage = formatMessageOutput(message, messagesInfo.total_lines);
+      let formattedMessage = formatMessageOutput(message, messagesInfo.total_lines);
 
       console.log(formattedMessage);
     });
@@ -274,7 +274,7 @@ function logMessages (messagesInfo) {
  * Reads through the configured path scans the matching files for messages.
  */
 function scanAndProcessMessages () {
-  var stream = readdirp(scanPath, {
+  let stream = readdirp(scanPath, {
     fileFilter: fileFilterer
   });
 
@@ -290,17 +290,17 @@ function scanAndProcessMessages () {
 
   stream
     .pipe(eventStream.map(function (fileInformation, callback) {
-      var input                 = fs.createReadStream(fileInformation.fullPath, { encoding: fileEncoding }),
-          // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
-          fileMessages          = { path: null, total_lines: 0, messages: [] },
-          currentFileLineNumber = 1;
+      let input                 = fs.createReadStream(fileInformation.fullPath, { encoding: fileEncoding }),
+        // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
+        fileMessages          = { path: null, total_lines: 0, messages: [] },
+        currentFileLineNumber = 1;
 
       fileMessages.path = fileInformation.path;
 
       input.pipe( eventStream.split() )
         .pipe( eventStream.map( function( fileLineString, cb ){
-          var messages,
-              lengthError;
+          let messages,
+            lengthError;
 
           if (fileLineString.length < lineLengthLimit) {
             messages = retrieveMessagesFromLine(fileLineString, currentFileLineNumber);
@@ -323,7 +323,7 @@ function scanAndProcessMessages () {
 
           currentFileLineNumber += 1;
         })
-      );
+        );
 
       input.on('end', function () {
         fileMessages.total_lines = currentFileLineNumber;
@@ -347,7 +347,7 @@ function scanAndProcessMessages () {
  * @property  {Number}  options.line_length_limit   The number of characters a line can be before it is ignored. Defaults to 1000.
  * @property  {Array}   options.skip                An array of names of checks to skip.
  */
- // TODO(johnp): Allow custom messageChecks to be added via options.
+// TODO(johnp): Allow custom messageChecks to be added via options.
 function parseUserOptionsAndScan (options) {
   if (options) {
     if (options.path) {
