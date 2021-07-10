@@ -16,37 +16,37 @@ let lineLengthLimit    = 1000;
 let skipChecks         = [];
 let messageChecks      = {
   note: {
-    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
     label:    ' ✐ NOTE',
     colorer:  chalk.green
   },
   optimize: {
-    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
     label:    ' ↻ OPTIMIZE',
     colorer:  chalk.blue
   },
   todo: {
-    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
     label:    ' ✓ TODO',
     colorer:  chalk.magenta
   },
   hack: {
-    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
     label:    ' ✄ HACK',
     colorer:  chalk.yellow
   },
   xxx: {
-    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
     label:    ' ✗ XXX',
     colorer:  chalk.black.bgYellow
   },
   fixme: {
-    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
     label:    ' ☠ FIXME',
     colorer:  chalk.red
   },
   bug: {
-    regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+    regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
     label:    ' ☢ BUG',
     colorer:  chalk.white.bgRed
   }
@@ -226,22 +226,17 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
 }
 
 /**
- * Formatter function for the file name. Takes a file path, and the total
- * number of messages in the file, and formats this information for display as
- * the heading for the file messages.
+ * Formatter function for the file name. Formats a heading for display from
+ * the file path and number of messages.
  *
  * @param   {String} filePath
  * @param   {Number} numberOfMessages
  *
- * @return  {String}
+ * @return  {chalk.Chalk}
  */
 function formatFilePathOutput (filePath, numberOfMessages) {
-  let filePathOutput = chalk.bold.white('\n* ' + filePath + ' '),
-    messagesString = 'messages';
-
-  if (numberOfMessages === 1) {
-    messagesString = 'message';
-  }
+  let filePathOutput = chalk.bold.white('\n* ' + filePath + ' ');
+  const messagesString = numberOfMessages === 1 ? 'message' : 'messages';
 
   filePathOutput += chalk.grey('[' + numberOfMessages + ' ' + messagesString + ']:');
 
