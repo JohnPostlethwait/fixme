@@ -35,6 +35,18 @@ The following are examples of valid annotations:
 <!-- HACK: .-->
 #{ TODO (Jimmbo): Have a party. #}
 // XXX:
+some code; // NOTE: That's some code.
+let foo = "bar"; /* NOTE: A multi-line
+note.
+*/
+/*
+NOTE: The leading whitespace will be stripped
+
+But not the stuff above here.
+
+
+
+*/
 ```
 
 The following are examples of invalid annotations:
@@ -45,4 +57,10 @@ Not a comment.
 // xxx: needs to be uppercase.
 // NOTE(not valid: still part of the author.
 <!-- FIXME: typo. ->
+// Not a note.
+// https://example.org/ Just a link.
+/* also (not): an annotation. */
+/* FIXME: Wrong closing tag -->
+not a // NOTE
+(not the author): hm
 ```
