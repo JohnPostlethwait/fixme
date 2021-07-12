@@ -24,5 +24,13 @@
         "no-var": [
             "warn"
         ]
-    }
+    },
+    "overrides": [
+        {
+            "files": "test/**/*.js",
+            "env": {
+                "mocha": true
+            }
+        }
+    ]
 }
