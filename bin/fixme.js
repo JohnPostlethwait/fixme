@@ -267,8 +267,10 @@ function logMessages (messagesInfo) {
 
 /**
  * Reads through the configured path scans the matching files for messages.
+ * 
+ * @param {Function} [done] Optional callback for when processing is finished.
  */
-function scanAndProcessMessages () {
+function scanAndProcessMessages (done) {
   let stream = readdirp(scanPath, {
     fileFilter: fileFilterer
   });
@@ -324,6 +326,7 @@ function scanAndProcessMessages () {
         fileMessages.total_lines = currentFileLineNumber;
 
         logMessages(fileMessages);
+        if (done) done();
       });
 
       callback();
@@ -341,9 +344,11 @@ function scanAndProcessMessages () {
  * @property  {String}  options.file_encoding       The encoding the files scanned will be opened with, defaults to 'utf8'.
  * @property  {Number}  options.line_length_limit   The number of characters a line can be before it is ignored. Defaults to 1000.
  * @property  {Array}   options.skip                An array of names of checks to skip.
+ * 
+ * @param {Function} [done] An optional callback to execute once processing is done. Takes no arguments.
  */
 // TODO(johnp): Allow custom messageChecks to be added via options.
-function parseUserOptionsAndScan (options) {
+function parseUserOptionsAndScan (options, done) {
   if (options) {
     if (options.path) {
       scanPath = options.path;
@@ -376,7 +381,7 @@ function parseUserOptionsAndScan (options) {
     }
   }
 
-  scanAndProcessMessages();
+  scanAndProcessMessages(done);
 }
 
 module.exports = parseUserOptionsAndScan;

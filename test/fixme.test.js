@@ -20,14 +20,12 @@ describe("fixme", () => {
     console.log.restore();
   });
 
-  it("should recognize a TODO", () => {
-    const spy = sinon.spy(console, "log");
-
+  it("should recognize a TODO", (done) => {
     const options = {
       "path": path.join(__dirname, "cases", "valid"),
       "file_patterns": [ "**/todo.txt" ],
     };
 
-    fixme(options);
+    fixme(options, done);
   });
 });
