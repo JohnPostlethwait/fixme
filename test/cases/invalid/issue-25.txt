@@ -1,0 +1,6 @@
+async checkReportInfo (data) {
+  const note = _.trim(data.report_note)
+  if (data.report_type === 'others' && !note) {
+    throw new ReportNoteRequired()
+  }
+}

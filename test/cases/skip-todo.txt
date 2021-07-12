@@ -1,0 +1,7 @@
+// NOTE: Note this down.
+// OPTIMIZE: Make something faster.
+// TODO: Do something...
+// HACK: Maybe not the best way to do this?
+// XXX: Yikes change this.
+// FIXME: Fix this when you get the chance.
+// BUG: Oh no! I'm broken!
