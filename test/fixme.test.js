@@ -26,6 +26,10 @@ describe("fixme", () => {
       "file_patterns": [ "**/todo.txt" ],
     };
 
-    fixme(options, done);
+    fixme(options, () => {
+      expect(console.log.firstCall.args[0]).to.equal("\n* todo.txt [1 message]:");
+      expect(console.log.secondCall.args[0]).to.equal("  [Line 1]  ✓ TODO: Eat some cake.");
+      done();
+    });
   });
 });
