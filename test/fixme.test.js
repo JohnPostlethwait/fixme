@@ -32,4 +32,16 @@ describe("fixme", () => {
       done();
     });
   });
+
+  it("should recognize a FIXME", (done) => {
+    const options = {
+      "path": path.join(__dirname, "cases", "valid"),
+      "file_patterns": [ "**/fixme.txt" ],
+    };
+
+    fixme(options, () => {
+      expect(console.log.secondCall.args[0]).to.equal("  [Line 1]  ☠ FIXME: Get ripped");
+      done();
+    });
+  });
 });
