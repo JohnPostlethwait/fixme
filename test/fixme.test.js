@@ -13,7 +13,9 @@ chalk.level = 0;
 
 describe('fixme', () => {
   describe('valid annotations', () => {
-    const valid_cases = path.join(__dirname, 'cases', 'valid');
+    const options = {
+      'path': path.join(__dirname, 'cases', 'valid')
+    };
 
     beforeEach(() => {
       sinon.stub(console, 'log');
@@ -24,10 +26,7 @@ describe('fixme', () => {
     });
 
     it('should recognize all verbs', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/verbs.txt' ],
-      };
+      options.file_patterns = [ '**/verbs.txt' ];
 
       fixme(options, () => {
         expect(console.log.callCount).to.equal(8);
@@ -50,10 +49,7 @@ describe('fixme', () => {
     });
 
     it('should recognize strip whitespace', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/whitespace.txt' ],
-      };
+      options.file_patterns = [ '**/whitespace.txt' ];
 
       fixme(options, () => {
         expect(console.log.secondCall.args[0]).to.equal(
@@ -65,10 +61,7 @@ describe('fixme', () => {
     });
 
     it('should recognize comments after code', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/after-code.txt' ],
-      };
+      options.file_patterns = [ '**/after-code.txt' ];
 
       fixme(options, () => {
         expect(console.log.secondCall.args[0]).to.equal(
@@ -80,10 +73,7 @@ describe('fixme', () => {
     });
 
     it('should recognize an author', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/author.txt' ],
-      };
+      options.file_patterns = [ '**/author.txt' ];
 
       fixme(options, () => {
         expect(console.log.secondCall.args[0]).to.equal(
@@ -98,10 +88,7 @@ describe('fixme', () => {
     });
 
     it('should recognize single character messages', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/one-character.txt']
-      };
+      options.file_patterns = [ '**/one-character.txt'];
 
       fixme(options, () => {
         const messages = console.log.getCalls().map(c => c.args[0]);
@@ -116,10 +103,7 @@ describe('fixme', () => {
     });
 
     it('should recognize empty messages', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/no-character.txt']
-      };
+      options.file_patterns = [ '**/no-character.txt'];
 
       fixme(options, () => {
         const messages = console.log.getCalls().map(c => c.args[0]);
@@ -134,10 +118,7 @@ describe('fixme', () => {
     });
 
     it('should recognize multiline comments', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/multiline-note.txt']
-      };
+      options.file_patterns = [ '**/multiline-note.txt'];
 
       fixme(options, () => {
         const messages = console.log.getCalls().map(c => c.args[0]);
@@ -155,10 +136,7 @@ describe('fixme', () => {
     });
   
     it('should strip only leading and trailing whitespace from multiline messages', (done) => {
-      const options = {
-        'path': valid_cases,
-        'file_patterns': [ '**/whitespace-multiline.txt']
-      };
+      options.file_patterns = [ '**/whitespace-multiline.txt'];
 
       fixme(options, () => {
         const messages = console.log.getCalls().map(c => c.args[0]);
@@ -176,8 +154,8 @@ describe('fixme', () => {
     const invalid_cases = path.join(__dirname, 'cases', 'invalid');
 
     beforeEach(() => {
-      sinon.stub(console, "log");
-      sinon.stub(console, "error");
+      sinon.stub(console, 'log');
+      sinon.stub(console, 'error');
     });
 
     afterEach(() => {
@@ -187,7 +165,7 @@ describe('fixme', () => {
 
     // TODO: Implement test cases.
     it('should error without matching closing tag');
-    it('should error with misspelled closing tag')
+    it('should error with misspelled closing tag');
     it('should not recognize `!note` as an annotation');
     it('should not recognize a link as an annotation');
     it('should error when author section is not closed');
