@@ -20,9 +20,11 @@ describe('fixme', () => {
     console.log.restore();
   });
 
+  const valid_cases = path.join(__dirname, 'cases', 'valid');
+
   it('should recognize all verbs', (done) => {
     const options = {
-      'path': path.join(__dirname, 'cases', 'valid'),
+      'path': valid_cases,
       'file_patterns': [ '**/verbs.txt' ],
     };
 
@@ -48,7 +50,7 @@ describe('fixme', () => {
 
   it('should recognize strip whitespace', (done) => {
     const options = {
-      'path': path.join(__dirname, 'cases', 'valid'),
+      'path': valid_cases,
       'file_patterns': [ '**/whitespace.txt' ],
     };
 
@@ -58,6 +60,39 @@ describe('fixme', () => {
       );
       
       done();        
+    });
+  });
+
+  it('should recognize comments after code', (done) => {
+    const options = {
+      'path': valid_cases,
+      'file_patterns': [ '**/after-code.txt' ],
+    };
+
+    fixme(options, () => {
+      expect(console.log.secondCall.args[0]).to.equal(
+        '  [Line 1]  ✐ NOTE: That\'s some code.'
+      );
+
+      done();
+    });
+  });
+
+  it('should recognize an author', (done) => {
+    const options = {
+      'path': valid_cases,
+      'file_patterns': [ '**/author.txt' ],
+    };
+
+    fixme(options, () => {
+      expect(console.log.secondCall.args[0]).to.equal(
+        '  [Line 1]  ✓ TODO from Jimmbo: Have a party.'
+      );
+      expect(console.log.thirdCall.args[0]).to.equal(
+        '  [Line 5]  ✓ TODO from Mary: Grow.'
+      );
+
+      done();
     });
   });
 });

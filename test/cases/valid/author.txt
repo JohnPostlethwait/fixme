@@ -1,4 +1,4 @@
-#{ TODO (Jimmbo): Have a party. #}
+// TODO (Jimmbo): Have a party.
 
 Ea et sint harum ex culpa ad atque quam.
 Neque totam minima quo et.
