@@ -95,4 +95,78 @@ describe('fixme', () => {
       done();
     });
   });
+
+  it('should recognize single character messages', (done) => {
+    const options = {
+      'path': valid_cases,
+      'file_patterns': [ '**/one-character.txt']
+    };
+
+    fixme(options, () => {
+      const messages = console.log.getCalls().map(c => c.args[0]);
+
+      expect(messages[1]).to.equal('  [Line 1]  ✄ HACK: .');
+      expect(messages[2]).to.equal('  [Line 4]  ✄ HACK: .');
+      expect(messages[3]).to.equal('  [Line 5]  ✄ HACK: .');
+      expect(messages[4]).to.equal('  [Line 6]  ✄ HACK: .');
+
+      done();
+    });
+  });
+
+  it('should recognize empty messages', (done) => {
+    const options = {
+      'path': valid_cases,
+      'file_patterns': [ '**/no-character.txt']
+    };
+
+    fixme(options, () => {
+      const messages = console.log.getCalls().map(c => c.args[0]);
+
+      expect(messages[1]).to.equal('  [Line 1]  ✗ XXX: [[no message to display]]');
+      expect(messages[2]).to.equal('  [Line 4]  ↻ OPTIMIZE: [[no message to display]]');
+      expect(messages[3]).to.equal('  [Line 5]  ↻ OPTIMIZE: [[no message to display]]');
+      expect(messages[4]).to.equal('  [Line 6]  ↻ OPTIMIZE: [[no message to display]]');
+
+      done();
+    });
+  });
+
+  it('should recognize multiline comments', (done) => {
+    const options = {
+      'path': valid_cases,
+      'file_patterns': [ '**/multiline-note.txt']
+    };
+
+    fixme(options, () => {
+      const messages = console.log.getCalls().map(c => c.args[0]);
+
+      expect(messages[1]).to.equal(
+        '  [Line  1]  ✐ NOTE: A note\nwhose content\nspans multiple\nlines.'
+      );
+      expect(messages[2]).to.equal(
+        '  [Line  6]  ✐ NOTE: XML note spanning\nmultiple lines.'
+      );
+      expect(messages[3]).to.equal('  [Line 10]  ✐ NOTE: Multiple\nlines.');
+
+      done();
+    });
+  });
+  
+  it('should strip only leading and trailing whitespace from multiline messages', (done) => {
+    const options = {
+      'path': valid_cases,
+      'file_patterns': [ '**/whitespace-multiline.txt']
+    };
+
+    fixme(options, () => {
+      const messages = console.log.getCalls().map(c => c.args[0]);
+
+      expect(messages[1]).to.equal(
+        '  [Line  1]  ✐ NOTE: The leading whitespace will be stripped\n\nBut not the stuff above here.'
+      );
+
+      done();
+    });
+  });
 });
