@@ -174,5 +174,32 @@ describe('fixme', () => {
 
   describe('invalid annotations', () => {
     const invalid_cases = path.join(__dirname, 'cases', 'invalid');
+
+    beforeEach(() => {
+      sinon.stub(console, "log");
+      sinon.stub(console, "error");
+    });
+
+    afterEach(() => {
+      console.log.restore();
+      console.error.restore();
+    });
+
+    // TODO: Implement test cases.
+    it('should error without matching closing tag');
+    it('should error with misspelled closing tag')
+    it('should not recognize `!note` as an annotation');
+    it('should not recognize a link as an annotation');
+    it('should error when author section is not closed');
+    it('should error without a closing tag');
+    it('should not recognize an annotation without a colon');
+    it('should not recognize an annotation without an opening tag');
+    it('should not recognize a lowerase verb');
+    it('should not recognize an invalid verb');
+    it('should not recognize an invalid verb with an author');
+
+  });
+
+  describe('options', () => {
   });
 });
