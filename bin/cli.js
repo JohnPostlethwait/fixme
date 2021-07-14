@@ -1,8 +1,8 @@
 'use strict';
 
-var minimist = require('minimist'),
-    fixme    = require('..'),
-    pkg      = require('../package');
+let minimist = require('minimist'),
+  fixme    = require('..'),
+  pkg      = require('../package');
 
 function help() {
   return '\
@@ -32,7 +32,7 @@ Examples:\n\
 ';
 }
 
-var argv = minimist(process.argv.slice(2));
+let argv = minimist(process.argv.slice(2));
 
 if (argv.version || argv.v) {
   console.log(pkg.version);
@@ -44,14 +44,14 @@ if (argv.help || argv.h) {
   process.exit();
 }
 
-var options = {};
+let options = {};
 
-var path = argv.path || argv.p;
+let path = argv.path || argv.p;
 if (path) {
   options.path = path;
 }
 
-var ignored_directories = argv.ignored_directories || argv.i;
+let ignored_directories = argv.ignored_directories || argv.i;
 if (typeof ignored_directories === 'string') {
   ignored_directories = [ignored_directories];
 }
@@ -59,22 +59,22 @@ if (ignored_directories) {
   options.ignored_directories = ignored_directories;
 }
 
-var file_patterns = argv._;
+let file_patterns = argv._;
 if (file_patterns.length > 0) {
   options.file_patterns = file_patterns;
 }
 
-var file_encoding = argv.file_encoding || argv.e;
+let file_encoding = argv.file_encoding || argv.e;
 if (file_encoding) {
   options.file_encoding = file_encoding;
 }
 
-var line_length_limit = argv.line_length_limit || argv.l;
+let line_length_limit = argv.line_length_limit || argv.l;
 if (line_length_limit) {
   options.line_length_limit = line_length_limit;
 }
 
-var skip = argv.skip || argv.s;
+let skip = argv.skip || argv.s;
 if (typeof skip === 'string') {
   skip = [skip];
 }

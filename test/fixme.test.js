@@ -1,46 +1,46 @@
-const chai = require("chai");
-const chalk = require("chalk");
-const sinon = require("sinon");
-const sinonChai = require("sinon-chai");
+const chai = require('chai');
+const chalk = require('chalk');
+const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 const expect = chai.expect;
 
-const path = require("path");
+const path = require('path');
 
-const fixme = require("../bin/fixme");
+const fixme = require('../bin/fixme');
 
 chalk.level = 0;
 
-describe("fixme", () => {
+describe('fixme', () => {
   beforeEach(() => {
-    sinon.spy(console, "log");
+    sinon.spy(console, 'log');
   });
 
   afterEach(() => {
     console.log.restore();
   });
 
-  it("should recognize a TODO", (done) => {
+  it('should recognize a TODO', (done) => {
     const options = {
-      "path": path.join(__dirname, "cases", "valid"),
-      "file_patterns": [ "**/todo.txt" ],
+      'path': path.join(__dirname, 'cases', 'valid'),
+      'file_patterns': [ '**/todo.txt' ],
     };
 
     fixme(options, () => {
-      expect(console.log.firstCall.args[0]).to.equal("\n* todo.txt [1 message]:");
-      expect(console.log.secondCall.args[0]).to.equal("  [Line 1]  ✓ TODO: Eat some cake.");
+      expect(console.log.firstCall.args[0]).to.equal('\n* todo.txt [1 message]:');
+      expect(console.log.secondCall.args[0]).to.equal('  [Line 1]  ✓ TODO: Eat some cake.');
       done();
     });
   });
 
-  it("should recognize a FIXME", (done) => {
+  it('should recognize a FIXME', (done) => {
     const options = {
-      "path": path.join(__dirname, "cases", "valid"),
-      "file_patterns": [ "**/fixme.txt" ],
+      'path': path.join(__dirname, 'cases', 'valid'),
+      'file_patterns': [ '**/fixme.txt' ],
     };
 
     fixme(options, () => {
-      expect(console.log.secondCall.args[0]).to.equal("  [Line 1]  ☠ FIXME: Get ripped");
+      expect(console.log.secondCall.args[0]).to.equal('  [Line 1]  ☠ FIXME: Get ripped');
       done();
     });
   });
