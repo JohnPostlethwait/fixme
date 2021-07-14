@@ -1,7 +1,7 @@
 // XXX:
 
 Ea et sint harum ex culpa ad atque quam.
-Neque totam minima quo et.
-Aliquid autem minima minus.
-Voluptas nam tempore tempore qui est commodi est qui.
+Neque totam minima quo et./*OPTIMIZE:*/
+Aliquid autem minima minus. // OPTIMIZE:
+Voluptas nam /* OPTIMIZE: */ tempore tempore qui est commodi est qui.
 Ex suscipit iste occaecati iusto.
