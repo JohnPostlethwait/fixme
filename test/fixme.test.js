@@ -14,9 +14,9 @@ chalk.level = 0;
 describe('fixme', () => {
   describe('valid annotations', () => {
     const valid_cases = path.join(__dirname, 'cases', 'valid');
-    
+
     beforeEach(() => {
-      sinon.spy(console, 'log');
+      sinon.stub(console, 'log');
     });
 
     afterEach(() => {
