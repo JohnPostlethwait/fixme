@@ -20,28 +20,44 @@ describe('fixme', () => {
     console.log.restore();
   });
 
-  it('should recognize a TODO', (done) => {
+  it('should recognize all verbs', (done) => {
     const options = {
       'path': path.join(__dirname, 'cases', 'valid'),
-      'file_patterns': [ '**/todo.txt' ],
+      'file_patterns': [ '**/verbs.txt' ],
     };
 
     fixme(options, () => {
-      expect(console.log.firstCall.args[0]).to.equal('\n* todo.txt [1 message]:');
-      expect(console.log.secondCall.args[0]).to.equal('  [Line 1]  ✓ TODO: Eat some cake.');
+      expect(console.log.callCount).to.equal(8);
+
+      const messages = console.log.getCalls().map(c => c.args[0]);
+      
+      expect(messages[0]).to.equal('\n* verbs.txt [7 messages]:');
+
+      // TODO: Fix formatting here once it's changed in code.
+      expect(messages[1]).to.equal('  [Line  1]  ✐ NOTE: A note.');
+      expect(messages[2]).to.equal('  [Line  2]  ↻ OPTIMIZE: A possible optimization.');
+      expect(messages[3]).to.equal('  [Line  3]  ✓ TODO: A todo.');
+      expect(messages[4]).to.equal('  [Line  4]  ✄ HACK: A hack.');
+      expect(messages[5]).to.equal('  [Line  5]  ✗ XXX: An alternate fixme style.');
+      expect(messages[6]).to.equal('  [Line  6]  ☠ FIXME: A fixme.');
+      expect(messages[7]).to.equal('  [Line  7]  ☢ BUG: A bug.');
+
       done();
     });
   });
 
-  it('should recognize a FIXME', (done) => {
+  it('should recognize strip whitespace', (done) => {
     const options = {
       'path': path.join(__dirname, 'cases', 'valid'),
-      'file_patterns': [ '**/fixme.txt' ],
+      'file_patterns': [ '**/whitespace.txt' ],
     };
 
     fixme(options, () => {
-      expect(console.log.secondCall.args[0]).to.equal('  [Line 1]  ☠ FIXME: Get ripped');
-      done();
+      expect(console.log.secondCall.args[0]).to.equal(
+        '  [Line 1]  ↻ OPTIMIZE: Maybe limit use of whitespace?'
+      );
+      
+      done();        
     });
   });
 });

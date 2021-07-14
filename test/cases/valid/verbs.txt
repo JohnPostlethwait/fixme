@@ -1,4 +1,10 @@
-// FIXME : Get ripped
+// NOTE: A note.
+// OPTIMIZE: A possible optimization.
+// TODO: A todo.
+// HACK: A hack.
+// XXX: An alternate fixme style.
+// FIXME: A fixme.
+// BUG: A bug.
 
 Ea et sint harum ex culpa ad atque quam.
 Neque totam minima quo et.
