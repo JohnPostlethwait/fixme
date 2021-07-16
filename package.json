@@ -20,7 +20,8 @@
   "main": "./index.js",
   "scripts": {
     "test": "mocha",
-    "lint": "eslint --cache ."
+    "lint": "eslint --cache .",
+    "lint-fix": "eslint --cache --fix ."
   },
   "bin": {
     "fixme": "bin/cli"

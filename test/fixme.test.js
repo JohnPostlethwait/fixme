@@ -12,6 +12,33 @@ const fixme = require('../bin/fixme');
 chalk.level = 0;
 
 describe('fixme', () => {
+  describe('options', () => {
+    describe('path', () => {
+      it('should accept a string');
+      it('should not accept a number or ')
+    });
+    describe('ignored_directories', () => {
+      it('should accept an array');
+      it('should accept a string');
+    });
+    describe('file_patterns', () => {
+      it('should accept an array');
+      it('should accept a string');
+    });
+    describe('file_encoding', () => {
+      it('should do something?');
+    });
+    describe('line_length_limit', () => {
+      it('should stop after the limit');
+      it('should not accept negative values');
+    });
+    describe('skip', () => {
+      it('should skip a verb (take a string)');
+      it('should skip verbs (take an array)');
+      it('should ignore unknown values');
+    });
+  });
+
   describe('valid annotations', () => {
     const options = {
       'path': path.join(__dirname, 'cases', 'valid')
@@ -151,7 +178,9 @@ describe('fixme', () => {
   });
 
   describe('invalid annotations', () => {
-    const invalid_cases = path.join(__dirname, 'cases', 'invalid');
+    const options = {
+      'path': path.join(__dirname, 'cases', 'invalid')
+    };
 
     beforeEach(() => {
       sinon.stub(console, 'log');
@@ -164,20 +193,76 @@ describe('fixme', () => {
     });
 
     // TODO: Implement test cases.
+
+    // Silently ignored errors
+    it('should not recognize a lowerase verb', (done) => {
+      options.file_patterns = ['**/not-uppercase.txt'];
+
+      fixme(options, () => {
+        expect(console.log).to.not.have.been.called;
+
+        done();
+      });
+    });
+    it('should not recognize an invalid verb', (done) => {
+      options.file_patterns = ['**/wrong-tag.txt'];
+
+      fixme(options, () => {
+        expect(console.log).to.not.have.been.called;
+
+        done();
+      });
+    });
+    it('should not recognize an invalid verb with an author', (done) => {
+      options.file_patterns = ['**/wrong-tag-author.txt'];
+
+      fixme(options, () => {
+        expect(console.log).to.not.have.been.called;
+
+        done();
+      });
+    });
+    it('should not recognize an annotation without a colon', (done) => {
+      options.file_patterns = ['**/no-colon.txt'];
+
+      fixme(options, () => {
+        expect(console.log).to.not.have.been.called;
+
+        done();
+      });
+    });
+    it('should not recognize an annotation without an opening tag', (done) => {
+      options.file_patterns = ['**/no-tag.txt'];
+
+      fixme(options, () => {
+        expect(console.log).to.not.have.been.called;
+
+        done();
+      });
+    });
+    it('should not recognize `!note` as an annotation', (done) => {
+      options.file_patterns = ['**/issue-25.txt'];
+
+      fixme(options, () => {
+        expect(console.log).to.not.have.been.called;
+
+        done();
+      });
+    });
+    it('should not recognize a link as an annotation', (done) => {
+      options.file_patterns = ['**/link.txt'];
+
+      fixme(options, () => {
+        expect(console.log).to.not.have.been.called;
+
+        done();
+      });
+    });
+
+    // Errors causing failure
     it('should error without matching closing tag');
     it('should error with misspelled closing tag');
-    it('should not recognize `!note` as an annotation');
-    it('should not recognize a link as an annotation');
     it('should error when author section is not closed');
     it('should error without a closing tag');
-    it('should not recognize an annotation without a colon');
-    it('should not recognize an annotation without an opening tag');
-    it('should not recognize a lowerase verb');
-    it('should not recognize an invalid verb');
-    it('should not recognize an invalid verb with an author');
-
-  });
-
-  describe('options', () => {
   });
 });
