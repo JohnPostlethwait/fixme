@@ -8,12 +8,6 @@ const isBinaryFile = require('isbinaryfile');
 const minimatch    = require('minimatch');
 const readdirp     = require('readdirp');
 
-let ignoredDirectories = ['node_modules/**', '.git/**', '.hg/**'];
-let filesToScan        = ['**/*.js', 'Makefile', '**/*.sh'];
-let scanPath           = process.cwd();
-let fileEncoding       = 'utf8';
-let lineLengthLimit    = 1000;
-let skipChecks         = [];
 let messageChecks      = {
   note: {
     regex:    /(?:^|[^:])(\/\/|\{\{!|!|\{#|\*)(--)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
@@ -51,48 +45,6 @@ let messageChecks      = {
     colorer:  chalk.white.bgRed
   }
 };
-
-/**
- * Determines whether or not to let the file through. by ensuring that the
- * file name does not match one of the excluded directories, and ensuring it
- * matches one of the file filters.
- *
- * It will also ensure that even if a binary file matches the filter patterns,
- * it will not let it through as searching binary file contents for string
- * matches will never make sense.
- *
- * @param   {String} fileInformation
- *
- * @return  {Boolean}
- */
-// TODO: This could be simpler using minimatch negation patterns in one set, instead disparate ones for files and directories.
-function fileFilterer (fileInformation) {
-  let shouldIgnoreDirectory = false;
-  let shouldIgnoreFile      = true;
-  let letTheFileThrough = true;
-
-  ignoredDirectories.forEach(function (directoryPattern) {
-    if (shouldIgnoreDirectory) return;
-    shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern, { dot: true });
-  });
-
-  if (!shouldIgnoreDirectory) {
-    filesToScan.forEach(function (filePattern) {
-      if (!shouldIgnoreFile) return;
-
-      shouldIgnoreFile = !(minimatch(fileInformation.path, filePattern));
-    });
-  }
-
-  letTheFileThrough = !(shouldIgnoreDirectory || (!shouldIgnoreDirectory && shouldIgnoreFile));
-
-  // Never let binary files through, searching them for comments will make no sense...
-  if (letTheFileThrough && isBinaryFile.isBinaryFileSync(fileInformation.fullPath)) {
-    letTheFileThrough = false;
-  }
-
-  return letTheFileThrough;
-}
 
 /**
  * Takes a line of a file and the line number, and returns an array of all of
@@ -270,13 +222,41 @@ function logMessages (messagesInfo) {
  * 
  * @param {Function} [done] Optional callback for when processing is finished.
  */
-function scanAndProcessMessages (done) {
-  let stream = readdirp(scanPath, {
-    fileFilter: fileFilterer
+function scanAndProcessMessages (options, done) {
+  let stream = readdirp(options.path, {
+    fileFilter: function (fileInformation) {
+      // TODO: This could be simpler using minimatch negation patterns in one set, instead disparate ones for files and directories.
+
+      let shouldIgnoreDirectory = false;
+      let shouldIgnoreFile      = true;
+      let letTheFileThrough = true;
+    
+      options.ignored_directories.forEach(function (directoryPattern) {
+        if (shouldIgnoreDirectory) return;
+        shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern, { dot: true });
+      });
+    
+      if (!shouldIgnoreDirectory) {
+        options.file_patterns.forEach(function (filePattern) {
+          if (!shouldIgnoreFile) return;
+    
+          shouldIgnoreFile = !(minimatch(fileInformation.path, filePattern));
+        });
+      }
+    
+      letTheFileThrough = !(shouldIgnoreDirectory || (!shouldIgnoreDirectory && shouldIgnoreFile));
+    
+      // Never let binary files through, searching them for comments will make no sense...
+      if (letTheFileThrough && isBinaryFile.isBinaryFileSync(fileInformation.fullPath)) {
+        letTheFileThrough = false;
+      }
+    
+      return letTheFileThrough;
+    }
   });
 
   // Remove skipped checks for our mapping
-  skipChecks.forEach(function (checkName) {
+  options.skip.forEach(function (checkName) {
     delete messageChecks[checkName];
   });
 
@@ -287,7 +267,7 @@ function scanAndProcessMessages (done) {
 
   stream
     .pipe(eventStream.map(function (fileInformation, callback) {
-      let input                 = fs.createReadStream(fileInformation.fullPath, { encoding: fileEncoding }),
+      let input                 = fs.createReadStream(fileInformation.fullPath, { encoding: options.fileEncoding }),
         // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
         fileMessages          = { path: null, total_lines: 0, messages: [] },
         currentFileLineNumber = 1;
@@ -299,16 +279,16 @@ function scanAndProcessMessages (done) {
           let messages,
             lengthError;
 
-          if (fileLineString.length < lineLengthLimit) {
+          if (fileLineString.length < options.line_length_limit) {
             messages = retrieveMessagesFromLine(fileLineString, currentFileLineNumber);
 
             messages.forEach(function (message) {
               fileMessages.messages.push(message);
             });
-          } else if (skipChecks.indexOf('line') === -1){
+          } else if (options.skip.indexOf('line') === -1){
             lengthError = 'Fixme is skipping this line because its length is ' +
                           'greater than the maximum line-length of ' +
-                          lineLengthLimit + '.';
+                          options.line_length_limit + '.';
 
             fileMessages.messages.push({
               message:      lengthError,
@@ -349,39 +329,48 @@ function scanAndProcessMessages (done) {
  */
 // TODO(johnp): Allow custom messageChecks to be added via options.
 function parseUserOptionsAndScan (options, done) {
+  const args = {
+    path: process.cwd(),
+    ignored_directories: ['node_modules/**', '.git/**', '.hg/**'],
+    file_patterns: ['**/*.js', 'Makefile', '**/*.sh'],
+    file_encoding: 'utf8',
+    line_length_limit: 1000,
+    skip: []
+  };
+
   if (options) {
     if (options.path) {
-      scanPath = options.path;
+      args.path = options.path;
     }
 
     if (options.ignored_directories &&
         Array.isArray(options.ignored_directories) &&
         options.ignored_directories.length) {
-      ignoredDirectories = options.ignored_directories;
+      args.ignored_directories = options.ignored_directories;
     }
 
     if (options.file_patterns &&
         Array.isArray(options.file_patterns) &&
         options.file_patterns.length) {
-      filesToScan = options.file_patterns;
+      args.file_patterns = options.file_patterns;
     }
 
     if (options.file_encoding) {
-      fileEncoding = options.file_encoding;
+      args.file_encoding = options.file_encoding;
     }
 
     if (options.line_length_limit) {
-      lineLengthLimit = options.line_length_limit;
+      args.line_length_limit = options.line_length_limit;
     }
 
     if (options.skip &&
         Array.isArray(options.skip) &&
         options.skip.length) {
-      skipChecks = options.skip;
+      args.skip = options.skip;
     }
   }
 
-  scanAndProcessMessages(done);
+  scanAndProcessMessages(args, done);
 }
 
 module.exports = parseUserOptionsAndScan;
