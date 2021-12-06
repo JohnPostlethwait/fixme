@@ -15,7 +15,7 @@ describe('fixme', () => {
   describe('options', () => {
     describe('path', () => {
       it('should accept a string');
-      it('should not accept a number or ')
+      it('should not accept a number');
     });
     describe('ignored_directories', () => {
       it('should accept an array');
@@ -260,9 +260,41 @@ describe('fixme', () => {
     });
 
     // Errors causing failure
-    it('should error without matching closing tag');
-    it('should error with misspelled closing tag');
-    it('should error when author section is not closed');
-    it('should error without a closing tag');
+    it('should error without matching closing tag', (done) => {
+      options.file_patterns = ['**/wrong-closing.txt'];
+
+      fixme(options, () => {
+        expect(console.error).to.have.been.called;
+
+        done();
+      });
+    });
+    it('should error with misspelled closing tag', (done) => {
+      options.file_patterns = ['**/closing-typo.txt'];
+
+      fixme(options, () => {
+        expect(console.error).to.have.been.called;
+
+        done();
+      });
+    });
+    it('should error when author section is not closed', (done) => {
+      options.file_patterns = ['**/no-author-close.txt'];
+
+      fixme(options, () => {
+        expect(console.error).to.have.been.called;
+
+        done();
+      });
+    });
+    it('should error without a closing tag', (done) => {
+      options.file_patterns = ['**/no-closing.txt'];
+
+      fixme(options, () => {
+        expect(console.error).to.have.been.called;
+
+        done();
+      });
+    });
   });
 });
