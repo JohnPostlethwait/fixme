@@ -13,24 +13,45 @@ chalk.level = 0;
 
 describe('fixme', () => {
   describe('options', () => {
+    let options;
+    
+    beforeEach(() => {
+      sinon.stub(console, 'log');
+      options = {};
+    });
+
+    afterEach(() => {
+      console.log.restore();
+    });
+
     describe('path', () => {
       it('should accept a string');
-      it('should not accept a number');
+      it('should not accept a number', () => {
+        options.path = 4;
+
+        expect(fixme(options)).to.throw(TypeError);
+      });
     });
     describe('ignored_directories', () => {
       it('should accept an array');
       it('should accept a string');
+      it('should not except a number');
     });
     describe('file_patterns', () => {
       it('should accept an array');
       it('should accept a string');
+      it('should not accept a number');
     });
     describe('file_encoding', () => {
       it('should do something?');
     });
     describe('line_length_limit', () => {
       it('should stop after the limit');
-      it('should not accept negative values');
+      it('should not accept negative values', () => {
+        options.line_length_limit = -40;
+
+        expect(fixme(options)).to.throw(RangeError);
+      });
     });
     describe('skip', () => {
       it('should skip a verb (take a string)');
