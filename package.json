@@ -39,7 +39,7 @@
     "event-stream": "4.0.1",
     "isbinaryfile": "4.0.6",
     "minimatch": "3.0.4",
-    "minimist": "1.2.5",
+    "minimist": "1.2.6",
     "readdirp": "3.4.0"
   },
   "devDependencies": {}
