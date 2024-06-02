@@ -10,7 +10,7 @@ var byline = require("byline"),
 
 // TODO: Expand filetypes scanned. Possibly create new file to hold array.
 var ignoredDirectories = ["node_modules/**", ".git/**", ".hg/**"],
-  filesToScan = ["**/*.js", "Makefile", "**/*.sh"],
+  filesToScan = require("./fileTypes"),
   scanPath = process.cwd(),
   fileEncoding = "utf8",
   lineLengthLimit = 1000,
