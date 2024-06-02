@@ -16,6 +16,42 @@ _Fixme currently scans your matching files line-by-line looking for annotations 
 
 <!-- TODO: Add supported filetypes section -->
 
+## Supported Filetypes
+
+Fixme supports scanning for annotations in a variety of file types. The default file patterns it looks for are:
+
+- **JavaScript**: `**/*.js`
+- **Makefile**: `Makefile`
+- **Shell scripts**: `**/*.sh`
+- **HTML**: `**/*.html`
+- **CSS**: `**/*.css`
+- **JSON**: `**/*.json`
+- **Markdown**: `**/*.md`
+- **Text files**: `**/*.txt`
+- **YAML**: `**/*.yaml`, `**/*.yml`
+- **SASS**: `**/*.scss`
+- **LESS**: `**/*.less`
+- **PHP**: `**/*.php`
+- **Java**: `**/*.java`
+- **Python**: `**/*.py`
+- **Ruby**: `**/*.rb`
+- **C++**: `**/*.cpp`
+- **C#**: `**/*.cs`
+- **Swift**: `**/*.swift`
+- **Rust**: `**/*.rs`
+- **Go**: `**/*.go`
+- **Header files**: `**/*.h`, `**/*.hpp`
+- **TypeScript**: `**/*.ts`
+- **JSX**: `**/*.jsx`
+- **TSX**: `**/*.tsx`
+- **Vue.js**: `**/*.vue`
+- **Perl**: `**/*.pl`
+- **Lua**: `**/*.lua`
+- **Groovy**: `**/*.groovy`
+- **Scala**: `**/*.scala`
+- **Kotlin**: `**/*.kt`
+- **Dart**: `**/*.dart`
+
 ## Usage
 
 In order to use Fixme all you need to do is install it:
