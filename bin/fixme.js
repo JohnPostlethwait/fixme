@@ -8,7 +8,6 @@ var byline = require("byline"),
   minimatch = require("minimatch"),
   readdirp = require("readdirp");
 
-// TODO: Expand filetypes scanned. Possibly create new file to hold array.
 var ignoredDirectories = ["node_modules/**", ".git/**", ".hg/**"],
   filesToScan = require("./fileTypes"),
   scanPath = process.cwd(),
