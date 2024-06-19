@@ -1,56 +1,63 @@
-'use strict';
+"use strict";
 
-var byline        = require('byline'),
-    chalk         = require('chalk'),
-    eventStream   = require('event-stream'),
-    fs            = require('fs'),
-    isBinaryFile  = require('isbinaryfile'),
-    minimatch     = require('minimatch'),
-    readdirp      = require('readdirp');
+var byline = require("byline"),
+  chalk = require("chalk"),
+  eventStream = require("event-stream"),
+  fs = require("fs"),
+  isBinaryFile = require("isbinaryfile"),
+  minimatch = require("minimatch"),
+  readdirp = require("readdirp");
 
-var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
-    filesToScan         = ['**/*.js', 'Makefile', '**/*.sh'],
-    scanPath            = process.cwd(),
-    fileEncoding        = 'utf8',
-    lineLengthLimit     = 1000,
-    skipChecks          = [],
-    messageChecks       = {
-      note: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✐ NOTE',
-        colorer:  chalk.green
-      },
-      optimize: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ↻ OPTIMIZE',
-        colorer:  chalk.blue
-      },
-      todo: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✓ TODO',
-        colorer:  chalk.magenta
-      },
-      hack: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✄ HACK',
-        colorer:  chalk.yellow
-      },
-      xxx: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ✗ XXX',
-        colorer:  chalk.black.bgYellow
-      },
-      fixme: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ☠ FIXME',
-        colorer:  chalk.red
-      },
-      bug: {
-        regex:    /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-        label:    ' ☢ BUG',
-        colorer:  chalk.white.bgRed
-      }
-    };
+var ignoredDirectories = ["node_modules/**", ".git/**", ".hg/**"],
+  filesToScan = require("./fileTypes"),
+  scanPath = process.cwd(),
+  fileEncoding = "utf8",
+  lineLengthLimit = 1000,
+  skipChecks = [],
+  messageChecks = {
+    note: {
+      regex:
+        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+      label: " ✐ NOTE",
+      colorer: chalk.green,
+    },
+    optimize: {
+      regex:
+        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+      label: " ↻ OPTIMIZE",
+      colorer: chalk.blue,
+    },
+    todo: {
+      regex:
+        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+      label: " ✓ TODO",
+      colorer: chalk.magenta,
+    },
+    hack: {
+      regex:
+        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+      label: " ✄ HACK",
+      colorer: chalk.yellow,
+    },
+    xxx: {
+      regex:
+        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+      label: " ✗ XXX",
+      colorer: chalk.black.bgYellow,
+    },
+    fixme: {
+      regex:
+        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+      label: " ☠ FIXME",
+      colorer: chalk.red,
+    },
+    bug: {
+      regex:
+        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
+      label: " ☢ BUG",
+      colorer: chalk.white.bgRed,
+    },
+  };
 
 /**
  * Determines whether or not to let the file through. by ensuring that the
@@ -66,28 +73,36 @@ var ignoredDirectories  = ['node_modules/**', '.git/**', '.hg/**'],
  * @return  {Boolean}
  */
 // TODO: This could be simpler using minimatch negation patterns in one set, instead disparate ones for files and directories.
-function fileFilterer (fileInformation) {
+function fileFilterer(fileInformation) {
   var shouldIgnoreDirectory = false,
-      shouldIgnoreFile      = true,
-      letTheFileThrough;
+    shouldIgnoreFile = true,
+    letTheFileThrough;
 
   ignoredDirectories.forEach(function (directoryPattern) {
     if (shouldIgnoreDirectory) return;
-    shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern, { dot: true });
+    shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern, {
+      dot: true,
+    });
   });
 
   if (!shouldIgnoreDirectory) {
     filesToScan.forEach(function (filePattern) {
       if (!shouldIgnoreFile) return;
 
-      shouldIgnoreFile = !(minimatch(fileInformation.path, filePattern));
+      shouldIgnoreFile = !minimatch(fileInformation.path, filePattern);
     });
   }
 
-  letTheFileThrough = !(shouldIgnoreDirectory || (!shouldIgnoreDirectory && shouldIgnoreFile));
+  letTheFileThrough = !(
+    shouldIgnoreDirectory ||
+    (!shouldIgnoreDirectory && shouldIgnoreFile)
+  );
 
   // Never let binary files through, searching them for comments will make no sense...
-  if (letTheFileThrough && isBinaryFile.isBinaryFileSync(fileInformation.fullPath)) {
+  if (
+    letTheFileThrough &&
+    isBinaryFile.isBinaryFileSync(fileInformation.fullPath)
+  ) {
     letTheFileThrough = false;
   }
 
@@ -108,27 +123,31 @@ function fileFilterer (fileInformation) {
  *
  * @return  {Array}
  */
-function retrieveMessagesFromLine (lineString, lineNumber) {
+function retrieveMessagesFromLine(lineString, lineNumber) {
   var messageFormat = {
-    author:       null,
-    message:      null,
-    label:        null,
-    colorer:      null,
-    line_number:  lineNumber
-  },
-  messages = [];
+      author: null,
+      message: null,
+      label: null,
+      colorer: null,
+      line_number: lineNumber,
+    },
+    messages = [];
 
-  lineString = removeCommentEnd(lineString, ['-->', '#}}', '*/', '--}}', '}}', '#}'], '');
+  lineString = removeCommentEnd(
+    lineString,
+    ["-->", "#}}", "*/", "--}}", "}}", "#}"],
+    "",
+  );
 
   Object.keys(messageChecks).forEach(function (checkName) {
-    var matchResults  = lineString.match(messageChecks[checkName].regex),
-        checker       = messageChecks[checkName],
-        thisMessage;
+    var matchResults = lineString.match(messageChecks[checkName].regex),
+      checker = messageChecks[checkName],
+      thisMessage;
 
     if (matchResults && matchResults.length) {
       thisMessage = JSON.parse(JSON.stringify(messageFormat)); // Clone the above structure.
 
-      thisMessage.label   = checker.label;
+      thisMessage.label = checker.label;
       thisMessage.colorer = checker.colorer;
 
       if (matchResults[3] && matchResults[3].length) {
@@ -173,11 +192,11 @@ function removeCommentEnd(str, find, replace) {
  *
  * @return  {String}
  */
-function getPaddedLineNumber (lineNumber, totalLinesNumber) {
-  var paddedLineNumberString = '' + lineNumber;
+function getPaddedLineNumber(lineNumber, totalLinesNumber) {
+  var paddedLineNumberString = "" + lineNumber;
 
-  while (paddedLineNumberString.length < ('' + totalLinesNumber).length) {
-    paddedLineNumberString = ' ' + paddedLineNumberString;
+  while (paddedLineNumberString.length < ("" + totalLinesNumber).length) {
+    paddedLineNumberString = " " + paddedLineNumberString;
   }
 
   return paddedLineNumberString;
@@ -197,19 +216,22 @@ function getPaddedLineNumber (lineNumber, totalLinesNumber) {
  *
  * @return    {String}    The formatted message string.
  */
-function formatMessageOutput (individualMessage, totalNumberOfLines) {
-  var paddedLineNumber = getPaddedLineNumber(individualMessage.line_number, totalNumberOfLines),
-      finalLabelString,
-      finalNoteString;
+function formatMessageOutput(individualMessage, totalNumberOfLines) {
+  var paddedLineNumber = getPaddedLineNumber(
+      individualMessage.line_number,
+      totalNumberOfLines,
+    ),
+    finalLabelString,
+    finalNoteString;
 
-  finalNoteString = chalk.gray('  [Line ' + paddedLineNumber + '] ');
+  finalNoteString = chalk.gray("  [Line " + paddedLineNumber + "] ");
 
   finalLabelString = individualMessage.label;
 
   if (individualMessage.author) {
-    finalLabelString += (' from ' + individualMessage.author + ': ');
+    finalLabelString += " from " + individualMessage.author + ": ";
   } else {
-    finalLabelString += ': ';
+    finalLabelString += ": ";
   }
 
   finalLabelString = chalk.bold(individualMessage.colorer(finalLabelString));
@@ -219,7 +241,7 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
   if (individualMessage.message && individualMessage.message.length) {
     finalNoteString += individualMessage.colorer(individualMessage.message);
   } else {
-    finalNoteString += chalk.grey('[[no message to display]]');
+    finalNoteString += chalk.grey("[[no message to display]]");
   }
 
   return finalNoteString;
@@ -235,15 +257,17 @@ function formatMessageOutput (individualMessage, totalNumberOfLines) {
  *
  * @return  {String}
  */
-function formatFilePathOutput (filePath, numberOfMessages) {
-  var filePathOutput = chalk.bold.white('\n* ' + filePath + ' '),
-      messagesString = 'messages';
+function formatFilePathOutput(filePath, numberOfMessages) {
+  var filePathOutput = chalk.bold.white("\n* " + filePath + " "),
+    messagesString = "messages";
 
   if (numberOfMessages === 1) {
-    messagesString = 'message';
+    messagesString = "message";
   }
 
-  filePathOutput += chalk.grey('[' + numberOfMessages + ' ' + messagesString + ']:');
+  filePathOutput += chalk.grey(
+    "[" + numberOfMessages + " " + messagesString + "]:",
+  );
 
   return filePathOutput;
 }
@@ -258,12 +282,17 @@ function formatFilePathOutput (filePath, numberOfMessages) {
  * @property  {Array}   messagesInfo.messages All of the message objects for the file.
  * @property  {String}  messagesInfo.total_lines Total number of lines in the file.
  */
-function logMessages (messagesInfo) {
+function logMessages(messagesInfo) {
   if (messagesInfo.messages.length) {
-    console.log(formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length));
+    console.log(
+      formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length),
+    );
 
     messagesInfo.messages.forEach(function (message) {
-      var formattedMessage = formatMessageOutput(message, messagesInfo.total_lines);
+      var formattedMessage = formatMessageOutput(
+        message,
+        messagesInfo.total_lines,
+      );
 
       console.log(formattedMessage);
     });
@@ -273,9 +302,9 @@ function logMessages (messagesInfo) {
 /**
  * Reads through the configured path scans the matching files for messages.
  */
-function scanAndProcessMessages () {
+function scanAndProcessMessages() {
   var stream = readdirp(scanPath, {
-    fileFilter: fileFilterer
+    fileFilter: fileFilterer,
   });
 
   // Remove skipped checks for our mapping
@@ -284,55 +313,60 @@ function scanAndProcessMessages () {
   });
 
   // TODO: Actually do something meaningful/useful with these handlers.
-  stream
-    .on('warn', console.warn)
-    .on('error', console.error);
+  stream.on("warn", console.warn).on("error", console.error);
 
-  stream
-    .pipe(eventStream.map(function (fileInformation, callback) {
-      var input                 = fs.createReadStream(fileInformation.fullPath, { encoding: fileEncoding }),
-          // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
-          fileMessages          = { path: null, total_lines: 0, messages: [] },
-          currentFileLineNumber = 1;
+  stream.pipe(
+    eventStream.map(function (fileInformation, callback) {
+      var input = fs.createReadStream(fileInformation.fullPath, {
+          encoding: fileEncoding,
+        }),
+        // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
+        fileMessages = { path: null, total_lines: 0, messages: [] },
+        currentFileLineNumber = 1;
 
       fileMessages.path = fileInformation.path;
 
-      input.pipe( eventStream.split() )
-        .pipe( eventStream.map( function( fileLineString, cb ){
-          var messages,
-              lengthError;
+      input.pipe(eventStream.split()).pipe(
+        eventStream.map(function (fileLineString, cb) {
+          var messages, lengthError;
 
           if (fileLineString.length < lineLengthLimit) {
-            messages = retrieveMessagesFromLine(fileLineString, currentFileLineNumber);
+            messages = retrieveMessagesFromLine(
+              fileLineString,
+              currentFileLineNumber,
+            );
 
             messages.forEach(function (message) {
               fileMessages.messages.push(message);
             });
-          } else if (skipChecks.indexOf('line') === -1){
-            lengthError = 'Fixme is skipping this line because its length is ' +
-                          'greater than the maximum line-length of ' +
-                          lineLengthLimit + '.';
+          } else if (skipChecks.indexOf("line") === -1) {
+            lengthError =
+              "Fixme is skipping this line because its length is " +
+              "greater than the maximum line-length of " +
+              lineLengthLimit +
+              ".";
 
             fileMessages.messages.push({
-              message:      lengthError,
-              line_number:  currentFileLineNumber,
-              label:        ' ⚠ SKIPPING CHECK',
-              colorer:      chalk.underline.red
+              message: lengthError,
+              line_number: currentFileLineNumber,
+              label: " ⚠ SKIPPING CHECK",
+              colorer: chalk.underline.red,
             });
           }
 
           currentFileLineNumber += 1;
-        })
+        }),
       );
 
-      input.on('end', function () {
+      input.on("end", function () {
         fileMessages.total_lines = currentFileLineNumber;
 
         logMessages(fileMessages);
       });
 
       callback();
-    }));
+    }),
+  );
 }
 
 /**
@@ -347,22 +381,26 @@ function scanAndProcessMessages () {
  * @property  {Number}  options.line_length_limit   The number of characters a line can be before it is ignored. Defaults to 1000.
  * @property  {Array}   options.skip                An array of names of checks to skip.
  */
- // TODO(johnp): Allow custom messageChecks to be added via options.
-function parseUserOptionsAndScan (options) {
+// TODO(johnp): Allow custom messageChecks to be added via options.
+function parseUserOptionsAndScan(options) {
   if (options) {
     if (options.path) {
       scanPath = options.path;
     }
 
-    if (options.ignored_directories &&
-        Array.isArray(options.ignored_directories) &&
-        options.ignored_directories.length) {
+    if (
+      options.ignored_directories &&
+      Array.isArray(options.ignored_directories) &&
+      options.ignored_directories.length
+    ) {
       ignoredDirectories = options.ignored_directories;
     }
 
-    if (options.file_patterns &&
-        Array.isArray(options.file_patterns) &&
-        options.file_patterns.length) {
+    if (
+      options.file_patterns &&
+      Array.isArray(options.file_patterns) &&
+      options.file_patterns.length
+    ) {
       filesToScan = options.file_patterns;
     }
 
@@ -374,9 +412,7 @@ function parseUserOptionsAndScan (options) {
       lineLengthLimit = options.line_length_limit;
     }
 
-    if (options.skip &&
-        Array.isArray(options.skip) &&
-        options.skip.length) {
+    if (options.skip && Array.isArray(options.skip) && options.skip.length) {
       skipChecks = options.skip;
     }
   }
