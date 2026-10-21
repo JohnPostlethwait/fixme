@@ -18,6 +18,10 @@
     "url": "git://github.com/JohnPostlethwait/fixme.git"
   },
   "main": "./index.js",
+  "files": [
+    "bin/",
+    "index.js"
+  ],
   "scripts": {
     "test": "node --test test/*.test.js"
   },
