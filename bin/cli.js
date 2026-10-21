@@ -82,4 +82,7 @@ if (skip) {
   options.skip = skip;
 }
 
-fixme(options);
+fixme(options).catch(function (err) {
+  console.error('fixme: ' + err.message);
+  process.exitCode = 1;
+});

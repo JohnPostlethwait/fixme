@@ -10,7 +10,7 @@ It ends up giving you an output like this:
 
 ![](http://i.imgur.com/OXsTtCZ.png)
 
-The color formatting is currently done using the excellent terminal coloring library [chalk](https://www.npmjs.org/package/chalk).
+Output is colored when printing to a terminal. Set `NO_COLOR=1` to turn color off, or `FORCE_COLOR=1` to keep it when piping.
 
 _Fixme currently scans your matching files line-by-line looking for annotations in the code. As such; multi-line annotation capturing is currently not supported. All annotations must be on the same line._
 
@@ -54,7 +54,7 @@ Fixme supports scanning for annotations in a variety of file types. The default 
 
 ## Usage
 
-In order to use Fixme all you need to do is install it:
+Fixme requires Node.js 20.12 or newer. In order to use Fixme all you need to do is install it:
 
 > npm install -g fixme
 
@@ -91,6 +91,13 @@ You should then see some nice output when this is run:
   [Line  89]  ✗ XXX: Let's do this better next time? It's bad.
   [Line 136]  ☠ FIXME: We sometimes get an undefined index in this array.
   [Line 211]  ☢ BUG: If the user inputs "Easter" we always output "Egg", even if they wanted a "Bunny".
+```
+
+`fixme()` returns a promise that resolves with the results once they are printed. To get the results without printing anything, use `fixme.scan()`:
+
+```javascript
+const results = await fixme.scan({ path: "src" });
+// [{ path: "a.js", total_lines: 12, messages: [{ type: "todo", label: " ✓ TODO", line_number: 3, author: null, message: "..." }] }]
 ```
 
 ### Configure Options (In More Detail)
@@ -159,4 +166,4 @@ You can have an author of a comment displayed via Fixme:
 
 #### More Examples
 
-Take a look at the `test/annotation_test.js` file, all of those comments in there are supported and expected to parse with Fixme.
+Take a look at the `test/fixtures/annotations.txt` file, all of those comments in there are supported and expected to parse with Fixme.
