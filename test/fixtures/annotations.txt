@@ -10,10 +10,11 @@
 // The next line is just a URL
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1399196
 
-require('../bin/fixme')({ // NOTE: It doesn't need to be placed at line start!
-  path:                 process.cwd(),
-  ignored_directories:  ['node_modules/**', '.git/**'],
-  file_patterns:        ['**/annotation_test.js'],
-  file_encoding:        'utf8',
-  line_length_limit:    1000
-});
+doSomething({ // NOTE: It doesn't need to be placed at line start!
+<!-- TODO: HTML comments are supported -->
+{{! HACK: Handlebars comments are supported }}
+{# FIXME: Twig comments are supported #}
+{{!-- XXX: Handlebars block comments are supported --}}
+// @todo: lower case with a colon and an @ prefix still match
+// NOTE(Jane Doe)  :   whitespace is trimmed
+// FIXME:

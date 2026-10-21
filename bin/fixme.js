@@ -1,377 +1,311 @@
 "use strict";
 
-var byline = require("byline"),
-  chalk = require("chalk"),
-  eventStream = require("event-stream"),
-  fs = require("fs"),
-  isBinaryFile = require("isbinaryfile"),
-  minimatch = require("minimatch"),
-  readdirp = require("readdirp");
+var fs = require("fs"),
+  path = require("path"),
+  readline = require("readline"),
+  styleText = require("util").styleText,
+  isBinaryFile = require("isbinaryfile").isBinaryFile,
+  minimatch = require("minimatch").minimatch;
 
-var ignoredDirectories = ["node_modules/**", ".git/**", ".hg/**"],
-  filesToScan = require("./fileTypes"),
-  scanPath = process.cwd(),
-  fileEncoding = "utf8",
-  lineLengthLimit = 1000,
-  skipChecks = [],
+var defaults = {
+    path: null, // process.cwd() at call time
+    ignored_directories: ["node_modules/**", ".git/**", ".hg/**"],
+    file_patterns: require("./fileTypes"),
+    file_encoding: "utf8",
+    line_length_limit: 1000,
+    skip: [],
+  },
   messageChecks = {
-    note: {
-      regex:
-        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?NOTE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-      label: " ✐ NOTE",
-      colorer: chalk.green,
-    },
-    optimize: {
-      regex:
-        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?OPTIMIZE\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-      label: " ↻ OPTIMIZE",
-      colorer: chalk.blue,
-    },
-    todo: {
-      regex:
-        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?TODO\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-      label: " ✓ TODO",
-      colorer: chalk.magenta,
-    },
-    hack: {
-      regex:
-        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?HACK\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-      label: " ✄ HACK",
-      colorer: chalk.yellow,
-    },
-    xxx: {
-      regex:
-        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?XXX\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-      label: " ✗ XXX",
-      colorer: chalk.black.bgYellow,
-    },
-    fixme: {
-      regex:
-        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?FIXME\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-      label: " ☠ FIXME",
-      colorer: chalk.red,
-    },
-    bug: {
-      regex:
-        /(?:^|[^:])(\/\/|\{\{\!|\!|\{\#|\*)(\-\-)?\s*@?BUG\b\s*(?:\(([^:]*)\))*\s*:?\s*(.*)/i,
-      label: " ☢ BUG",
-      colorer: chalk.white.bgRed,
-    },
-  };
+    note: { label: " ✐ NOTE", style: ["green"] },
+    optimize: { label: " ↻ OPTIMIZE", style: ["blue"] },
+    todo: { label: " ✓ TODO", style: ["magenta"] },
+    hack: { label: " ✄ HACK", style: ["yellow"] },
+    xxx: { label: " ✗ XXX", style: ["black", "bgYellow"] },
+    fixme: { label: " ☠ FIXME", style: ["red"] },
+    bug: { label: " ☢ BUG", style: ["white", "bgRed"] },
+  },
+  lineTooLong = { label: " ⚠ SKIPPING CHECK", style: ["underline", "red"] },
+  // A message ends at the first comment closer: -->, --}}, }}, #}, */
+  commentEnd = /\s*(?:--\}\}|-->|\}\}|#\}|\*\/).*$/;
+
+// Comment openers an annotation can follow. #, --, and * only count at the
+// start of a line or after whitespace, so `a--`, `"#x"` and `a * b` don't.
+var commentMarker = [
+  "(?:^|[^:])\\/\\/+!?", // //, ///, //! (but not the // in http://)
+  "\\/\\*+!?", // /*, /**
+  "(?:^|\\s)(?:#+|--|\\*+)", // #, ##, --, and * inside a block comment
+  "<!--",
+  "\\{\\{!(?:--)?", // {{! and {{!--
+  "\\{#",
+].join("|");
+
+// Groups: 1 keyword, 2 author, 3 colon, 4 message.
+Object.keys(messageChecks).forEach(function (checkName) {
+  messageChecks[checkName].regex = new RegExp(
+    "(?:" + commentMarker + ")\\s*@?(" + checkName + ")\\b" +
+      "\\s*(?:\\(([^:)]*)\\))?\\s*(:)?\\s*(.*)",
+    "gi",
+  );
+});
 
 /**
- * Determines whether or not to let the file through. by ensuring that the
- * file name does not match one of the excluded directories, and ensuring it
- * matches one of the file filters.
- *
- * It will also ensure that even if a binary file matches the filter patterns,
- * it will not let it through as searching binary file contents for string
- * matches will never make sense.
- *
- * @param   {String} fileInformation
- *
- * @return  {Boolean}
+ * An upper-case keyword is an annotation. Any other case needs a colon, so
+ * that comments like "* Note that..." or "// todo list" are not reported.
  */
-// TODO: This could be simpler using minimatch negation patterns in one set, instead disparate ones for files and directories.
-function fileFilterer(fileInformation) {
-  var shouldIgnoreDirectory = false,
-    shouldIgnoreFile = true,
-    letTheFileThrough;
-
-  ignoredDirectories.forEach(function (directoryPattern) {
-    if (shouldIgnoreDirectory) return;
-    shouldIgnoreDirectory = minimatch(fileInformation.path, directoryPattern, {
-      dot: true,
-    });
-  });
-
-  if (!shouldIgnoreDirectory) {
-    filesToScan.forEach(function (filePattern) {
-      if (!shouldIgnoreFile) return;
-
-      shouldIgnoreFile = !minimatch(fileInformation.path, filePattern);
-    });
-  }
-
-  letTheFileThrough = !(
-    shouldIgnoreDirectory ||
-    (!shouldIgnoreDirectory && shouldIgnoreFile)
+function isAnnotation(matchResults) {
+  return (
+    matchResults[1] === matchResults[1].toUpperCase() ||
+    matchResults[3] === ":"
   );
+}
 
-  // Never let binary files through, searching them for comments will make no sense...
-  if (
-    letTheFileThrough &&
-    isBinaryFile.isBinaryFileSync(fileInformation.fullPath)
-  ) {
-    letTheFileThrough = false;
+/**
+ * Merges the user options over the defaults.
+ *
+ * @param   {Object} options See parseUserOptionsAndScan.
+ *
+ * @return  {Object}
+ */
+function resolveOptions(options) {
+  var resolved = Object.assign({}, defaults, { path: process.cwd() });
+
+  options = options || {};
+
+  if (options.path) resolved.path = options.path;
+  if (nonEmptyArray(options.ignored_directories)) {
+    resolved.ignored_directories = options.ignored_directories;
+  }
+  if (nonEmptyArray(options.file_patterns)) {
+    resolved.file_patterns = options.file_patterns;
+  }
+  if (options.file_encoding) resolved.file_encoding = options.file_encoding;
+  if (options.line_length_limit) {
+    resolved.line_length_limit = Number(options.line_length_limit);
+  }
+  if (nonEmptyArray(options.skip)) resolved.skip = options.skip;
+
+  return resolved;
+}
+
+function nonEmptyArray(value) {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function matchesAny(filePath, patterns, minimatchOptions) {
+  return patterns.some(function (pattern) {
+    return minimatch(filePath, pattern, minimatchOptions);
+  });
+}
+
+/**
+ * Recursively lists the files under the scan path that match the file
+ * patterns and are not inside an ignored directory. Directories matching an
+ * ignore pattern are not descended into. Binary files are never returned, as
+ * searching them for comments makes no sense.
+ *
+ * @param   {Object} options Resolved options.
+ *
+ * @return  {Promise<Array>} Sorted, '/'-separated paths relative to options.path.
+ */
+async function findFiles(options) {
+  var found = [];
+
+  async function walk(relativeDir) {
+    var entries;
+
+    try {
+      entries = await fs.promises.readdir(
+        path.join(options.path, relativeDir),
+        { withFileTypes: true },
+      );
+    } catch (err) {
+      if (!relativeDir) throw err; // The scan path itself is unreadable.
+      console.warn("fixme: unable to read directory " + relativeDir + ": " + err.message);
+      return;
+    }
+
+    entries.sort(function (a, b) {
+      return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+    });
+
+    for (var entry of entries) {
+      var relativePath = relativeDir ? relativeDir + "/" + entry.name : entry.name;
+
+      if (entry.isDirectory()) {
+        if (!matchesAny(relativePath + "/", options.ignored_directories, { dot: true })) {
+          await walk(relativePath);
+        }
+      } else if (
+        entry.isFile() &&
+        !matchesAny(relativePath, options.ignored_directories, { dot: true }) &&
+        matchesAny(relativePath, options.file_patterns) &&
+        !(await isBinaryFile(path.join(options.path, relativePath)))
+      ) {
+        found.push(relativePath);
+      }
+    }
   }
 
-  return letTheFileThrough;
+  await walk("");
+
+  return found;
 }
 
 /**
  * Takes a line of a file and the line number, and returns an array of all of
  * the messages found in that line. Can return multiple messages per line, for
- * example, if a message was annotated with more than one type. EG: FIXME TODO
+ * example, if it has more than one comment. EG: // FIXME: one // TODO: two
  *
- * Each message in the array will have a label, a line_number, a colorer, and a
- * message. Will also include an author property if one is found on the
- * message.
+ * Each message has a type (the check name), a label, a line_number, an author
+ * (or null) and a message (or null).
  *
- * @param   {String} lineString The
+ * @param   {String} lineString
  * @param   {Number} lineNumber
+ * @param   {Array}  [skip] Names of checks to skip.
  *
  * @return  {Array}
  */
-function retrieveMessagesFromLine(lineString, lineNumber) {
-  var messageFormat = {
-      author: null,
-      message: null,
-      label: null,
-      colorer: null,
-      line_number: lineNumber,
-    },
-    messages = [];
-
-  lineString = removeCommentEnd(
-    lineString,
-    ["-->", "#}}", "*/", "--}}", "}}", "#}"],
-    "",
-  );
+function retrieveMessagesFromLine(lineString, lineNumber, skip) {
+  var messages = [];
 
   Object.keys(messageChecks).forEach(function (checkName) {
-    var matchResults = lineString.match(messageChecks[checkName].regex),
-      checker = messageChecks[checkName],
-      thisMessage;
+    if (skip && skip.indexOf(checkName) !== -1) return;
 
-    if (matchResults && matchResults.length) {
-      thisMessage = JSON.parse(JSON.stringify(messageFormat)); // Clone the above structure.
+    var matchResults = Array.from(
+      lineString.matchAll(messageChecks[checkName].regex),
+    ).find(isAnnotation);
 
-      thisMessage.label = checker.label;
-      thisMessage.colorer = checker.colorer;
+    if (matchResults) {
+      var message = matchResults[4].replace(commentEnd, "").trim();
 
-      if (matchResults[3] && matchResults[3].length) {
-        thisMessage.author = matchResults[3].trim();
-      }
-
-      if (matchResults[4] && matchResults[4].length) {
-        thisMessage.message = matchResults[4].trim();
-      }
+      messages.push({
+        type: checkName,
+        label: messageChecks[checkName].label,
+        line_number: lineNumber,
+        author: matchResults[2] && matchResults[2].trim() ? matchResults[2].trim() : null,
+        message: message || null,
+      });
     }
-
-    if (thisMessage) messages.push(thisMessage);
   });
 
   return messages;
 }
 
 /**
- * Removes the end of html, twig and handlebar comments. EG: -->, --}}, etc.
+ * Reads a file line-by-line and collects its messages.
  *
- * @param   {String} str
- * @param   {Array} find
- * @param   {String} replace
+ * @param   {String} relativePath
+ * @param   {Object} options Resolved options.
  *
- * @return  {String}
+ * @return  {Promise<Object>} { path, total_lines, messages }
  */
-function removeCommentEnd(str, find, replace) {
-  var replaceString = str;
-  for (var i = 0; i < find.length; i++) {
-    replaceString = replaceString.replace(find[i], replace);
-  }
-  return replaceString;
-}
-
-/**
- * Takes a line number and returns a padded string matching the total number of
- * characters in totalLinesNumber. EG: A lineNumber of 12 and a
- * totalLinesNumber of 1323 will return the string '  12'.
- *
- * @param   {Number} lineNumber
- * @param   {Number} totalLinesNumber
- *
- * @return  {String}
- */
-function getPaddedLineNumber(lineNumber, totalLinesNumber) {
-  var paddedLineNumberString = "" + lineNumber;
-
-  while (paddedLineNumberString.length < ("" + totalLinesNumber).length) {
-    paddedLineNumberString = " " + paddedLineNumberString;
-  }
-
-  return paddedLineNumberString;
-}
-
-/**
- * Takes an individual message object, as output from retrieveMessagesFromLine
- * and formats it for output.
- *
- * @param     {Object}    individualMessage
- * @property  {String}    individualMessage.author
- * @property  {String}    individualMessage.message
- * @property  {String}    individualMessage.label
- * @property  {Function}  individualMessage.colorer
- * @property  {Number}    individualMessage.line_number
- * @param     {Number}    totalNumberOfLines
- *
- * @return    {String}    The formatted message string.
- */
-function formatMessageOutput(individualMessage, totalNumberOfLines) {
-  var paddedLineNumber = getPaddedLineNumber(
-      individualMessage.line_number,
-      totalNumberOfLines,
-    ),
-    finalLabelString,
-    finalNoteString;
-
-  finalNoteString = chalk.gray("  [Line " + paddedLineNumber + "] ");
-
-  finalLabelString = individualMessage.label;
-
-  if (individualMessage.author) {
-    finalLabelString += " from " + individualMessage.author + ": ";
-  } else {
-    finalLabelString += ": ";
-  }
-
-  finalLabelString = chalk.bold(individualMessage.colorer(finalLabelString));
-
-  finalNoteString += finalLabelString;
-
-  if (individualMessage.message && individualMessage.message.length) {
-    finalNoteString += individualMessage.colorer(individualMessage.message);
-  } else {
-    finalNoteString += chalk.grey("[[no message to display]]");
-  }
-
-  return finalNoteString;
-}
-
-/**
- * Formatter function for the file name. Takes a file path, and the total
- * number of messages in the file, and formats this information for display as
- * the heading for the file messages.
- *
- * @param   {String} filePath
- * @param   {Number} numberOfMessages
- *
- * @return  {String}
- */
-function formatFilePathOutput(filePath, numberOfMessages) {
-  var filePathOutput = chalk.bold.white("\n* " + filePath + " "),
-    messagesString = "messages";
-
-  if (numberOfMessages === 1) {
-    messagesString = "message";
-  }
-
-  filePathOutput += chalk.grey(
-    "[" + numberOfMessages + " " + messagesString + "]:",
-  );
-
-  return filePathOutput;
-}
-
-/**
- * Takes an object representing the messages and other meta-info for the file
- * and calls off to the formatters for the messages, as well as logs the
- * formatted result.
- *
- * @param     {Object}  messagesInfo
- * @property  {String}  messagesInfo.path The file path
- * @property  {Array}   messagesInfo.messages All of the message objects for the file.
- * @property  {String}  messagesInfo.total_lines Total number of lines in the file.
- */
-function logMessages(messagesInfo) {
-  if (messagesInfo.messages.length) {
-    console.log(
-      formatFilePathOutput(messagesInfo.path, messagesInfo.messages.length),
-    );
-
-    messagesInfo.messages.forEach(function (message) {
-      var formattedMessage = formatMessageOutput(
-        message,
-        messagesInfo.total_lines,
-      );
-
-      console.log(formattedMessage);
+async function scanFile(relativePath, options) {
+  var fileMessages = { path: relativePath, total_lines: 0, messages: [] },
+    lines = readline.createInterface({
+      input: fs.createReadStream(path.join(options.path, relativePath), {
+        encoding: options.file_encoding,
+      }),
+      crlfDelay: Infinity,
     });
-  }
-}
 
-/**
- * Reads through the configured path scans the matching files for messages.
- */
-function scanAndProcessMessages() {
-  var stream = readdirp(scanPath, {
-    fileFilter: fileFilterer,
-  });
+  for await (var line of lines) {
+    fileMessages.total_lines += 1;
 
-  // Remove skipped checks for our mapping
-  skipChecks.forEach(function (checkName) {
-    delete messageChecks[checkName];
-  });
-
-  // TODO: Actually do something meaningful/useful with these handlers.
-  stream.on("warn", console.warn).on("error", console.error);
-
-  stream.pipe(
-    eventStream.map(function (fileInformation, callback) {
-      var input = fs.createReadStream(fileInformation.fullPath, {
-          encoding: fileEncoding,
-        }),
-        // lineStream            = byline.createStream(input, { encoding: fileEncoding }),
-        fileMessages = { path: null, total_lines: 0, messages: [] },
-        currentFileLineNumber = 1;
-
-      fileMessages.path = fileInformation.path;
-
-      input.pipe(eventStream.split()).pipe(
-        eventStream.map(function (fileLineString, cb) {
-          var messages, lengthError;
-
-          if (fileLineString.length < lineLengthLimit) {
-            messages = retrieveMessagesFromLine(
-              fileLineString,
-              currentFileLineNumber,
-            );
-
-            messages.forEach(function (message) {
-              fileMessages.messages.push(message);
-            });
-          } else if (skipChecks.indexOf("line") === -1) {
-            lengthError =
-              "Fixme is skipping this line because its length is " +
-              "greater than the maximum line-length of " +
-              lineLengthLimit +
-              ".";
-
-            fileMessages.messages.push({
-              message: lengthError,
-              line_number: currentFileLineNumber,
-              label: " ⚠ SKIPPING CHECK",
-              colorer: chalk.underline.red,
-            });
-          }
-
-          currentFileLineNumber += 1;
-        }),
+    if (line.length < options.line_length_limit) {
+      fileMessages.messages.push.apply(
+        fileMessages.messages,
+        retrieveMessagesFromLine(line, fileMessages.total_lines, options.skip),
       );
-
-      input.on("end", function () {
-        fileMessages.total_lines = currentFileLineNumber;
-
-        logMessages(fileMessages);
+    } else if (options.skip.indexOf("line") === -1) {
+      fileMessages.messages.push({
+        type: "line",
+        label: lineTooLong.label,
+        line_number: fileMessages.total_lines,
+        author: null,
+        message:
+          "Fixme is skipping this line because its length is " +
+          "greater than the maximum line-length of " +
+          options.line_length_limit +
+          ".",
       });
+    }
+  }
 
-      callback();
-    }),
-  );
+  return fileMessages;
 }
 
 /**
- * Takes an options object and over-writes the defaults, then calls off to the
- * scanner to scan the files for messages.
+ * Scans the configured path and resolves with the messages of every file that
+ * has at least one, without printing anything.
+ *
+ * @param   {Object} [options] See parseUserOptionsAndScan.
+ *
+ * @return  {Promise<Array>} [{ path, total_lines, messages }]
+ */
+async function scan(options) {
+  var resolved = resolveOptions(options),
+    results = [];
+
+  for (var relativePath of await findFiles(resolved)) {
+    var fileMessages = await scanFile(relativePath, resolved);
+
+    if (fileMessages.messages.length) results.push(fileMessages);
+  }
+
+  return results;
+}
+
+/**
+ * Applies the given styles (util.styleText format names) to text, if the
+ * output supports color. Respects NO_COLOR, FORCE_COLOR and NODE_DISABLE_COLORS.
+ */
+function style(formats, text) {
+  var forced = process.env.FORCE_COLOR && process.env.FORCE_COLOR !== "0",
+    enabled =
+      forced ||
+      (typeof process.stdout.hasColors === "function" && process.stdout.hasColors());
+
+  if (!enabled) return text;
+
+  return formats.reduceRight(function (styled, format) {
+    return styleText(format, styled, { validateStream: false });
+  }, text);
+}
+
+/**
+ * Formats a file's messages for output.
+ *
+ * @param   {Object} fileMessages As resolved by scanFile.
+ *
+ * @return  {String}
+ */
+function formatFileMessages(fileMessages) {
+  var count = fileMessages.messages.length,
+    width = String(fileMessages.total_lines).length,
+    output = [
+      style(["bold", "white"], "\n* " + fileMessages.path + " ") +
+        style(["gray"], "[" + count + " " + (count === 1 ? "message" : "messages") + "]:"),
+    ];
+
+  fileMessages.messages.forEach(function (message) {
+    var check = messageChecks[message.type] || lineTooLong,
+      label = message.label + (message.author ? " from " + message.author + ": " : ": ");
+
+    output.push(
+      style(["gray"], "  [Line " + String(message.line_number).padStart(width) + "] ") +
+        style(["bold"].concat(check.style), label) +
+        (message.message
+          ? style(check.style, message.message)
+          : style(["gray"], "[[no message to display]]")),
+    );
+  });
+
+  return output.join("\n");
+}
+
+/**
+ * Takes an options object and over-writes the defaults, then scans the files
+ * for messages and prints them to stdout.
  *
  * @param     {Object}  options
  * @property  {String}  options.path                The base directory to recursively scan for messages. Defaults to process.cwd()
@@ -380,44 +314,21 @@ function scanAndProcessMessages() {
  * @property  {String}  options.file_encoding       The encoding the files scanned will be opened with, defaults to 'utf8'.
  * @property  {Number}  options.line_length_limit   The number of characters a line can be before it is ignored. Defaults to 1000.
  * @property  {Array}   options.skip                An array of names of checks to skip.
+ *
+ * @return    {Promise<Array>} The same results as scan().
  */
 // TODO(johnp): Allow custom messageChecks to be added via options.
-function parseUserOptionsAndScan(options) {
-  if (options) {
-    if (options.path) {
-      scanPath = options.path;
-    }
+async function parseUserOptionsAndScan(options) {
+  var results = await scan(options);
 
-    if (
-      options.ignored_directories &&
-      Array.isArray(options.ignored_directories) &&
-      options.ignored_directories.length
-    ) {
-      ignoredDirectories = options.ignored_directories;
-    }
+  results.forEach(function (fileMessages) {
+    console.log(formatFileMessages(fileMessages));
+  });
 
-    if (
-      options.file_patterns &&
-      Array.isArray(options.file_patterns) &&
-      options.file_patterns.length
-    ) {
-      filesToScan = options.file_patterns;
-    }
-
-    if (options.file_encoding) {
-      fileEncoding = options.file_encoding;
-    }
-
-    if (options.line_length_limit) {
-      lineLengthLimit = options.line_length_limit;
-    }
-
-    if (options.skip && Array.isArray(options.skip) && options.skip.length) {
-      skipChecks = options.skip;
-    }
-  }
-
-  scanAndProcessMessages();
+  return results;
 }
 
 module.exports = parseUserOptionsAndScan;
+module.exports.scan = scan;
+module.exports.retrieveMessagesFromLine = retrieveMessagesFromLine;
+module.exports.formatFileMessages = formatFileMessages;

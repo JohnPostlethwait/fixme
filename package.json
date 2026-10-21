@@ -1,7 +1,7 @@
 {
   "name": "fixme",
   "description": "Scan for NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, and BUG comments within your source, and print them to stdout so you can deal with them.",
-  "version": "0.6.0",
+  "version": "0.8.0",
   "author": "John Postlethwait <john.postlethwait@gmail.com>",
   "website": "http://johnpostlethwait.github.io/fixme",
   "contributors": [],
@@ -19,13 +19,13 @@
   },
   "main": "./index.js",
   "scripts": {
-    "test": "node test/annotation_test.js"
+    "test": "node --test test/*.test.js"
   },
   "bin": {
     "fixme": "bin/cli"
   },
   "engines": {
-    "node": ">= v0.10.26"
+    "node": ">=20.12.0"
   },
   "licenses": [
     {
@@ -34,13 +34,9 @@
     }
   ],
   "dependencies": {
-    "byline": "5.0.0",
-    "chalk": "4.0.0",
-    "event-stream": "4.0.1",
-    "isbinaryfile": "4.0.6",
-    "minimatch": "3.1.4",
-    "minimist": "1.2.6",
-    "readdirp": "3.4.0"
+    "isbinaryfile": "5.0.7",
+    "minimatch": "10.2.6",
+    "minimist": "1.2.8"
   },
   "devDependencies": {}
 }
