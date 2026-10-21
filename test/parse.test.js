@@ -101,7 +101,7 @@ test("parses every annotation in the fixture file", async function () {
       [15, "hack", null, "Handlebars comments are supported"],
       [16, "fixme", null, "Twig comments are supported"],
       [17, "xxx", null, "Handlebars block comments are supported"],
-      [18, "todo", null, "lower case and an @ prefix still match"],
+      [18, "todo", null, "lower case with a colon and an @ prefix still match"],
       [19, "note", "Jane Doe", "whitespace is trimmed"],
       [20, "fixme", null, null],
     ],

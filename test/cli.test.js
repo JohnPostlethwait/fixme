@@ -68,3 +68,10 @@ test("FORCE_COLOR turns color on", function (t) {
 
   assert.match(run(["a.js"], { cwd: root, env: { FORCE_COLOR: "1" } }), /\u001b\[/);
 });
+
+test("exits 1 when the path does not exist", function () {
+  assert.throws(
+    () => run(["-p", path.join(__dirname, "does-not-exist")]),
+    (err) => err.status === 1 && /fixme: ENOENT/.test(err.stderr),
+  );
+});

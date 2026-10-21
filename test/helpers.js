@@ -9,7 +9,7 @@ function makeProject(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "fixme-test-"));
   const files = {
     "a.js": "// TODO: in a.js\n",
-    "src/b.py": "x = 1\n# not a match\n// FIXME(Ann): in b.py\n",
+    "src/b.py": "x = 1\n# not a match\n# FIXME(Ann): in b.py\n",
     "src/c.rb": "puts 1\n",
     "src/build/out.js": "// NOTE: in build output\n",
     "src/long.js": "// " + "x".repeat(50) + "\n// BUG: after a long line\n",

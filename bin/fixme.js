@@ -25,16 +25,39 @@ var defaults = {
     bug: { label: " ☢ BUG", style: ["white", "bgRed"] },
   },
   lineTooLong = { label: " ⚠ SKIPPING CHECK", style: ["underline", "red"] },
-  commentEnds = ["-->", "#}}", "*/", "--}}", "}}", "#}"];
+  // A message ends at the first comment closer: -->, --}}, }}, #}, */
+  commentEnd = /\s*(?:--\}\}|-->|\}\}|#\}|\*\/).*$/;
 
+// Comment openers an annotation can follow. #, --, and * only count at the
+// start of a line or after whitespace, so `a--`, `"#x"` and `a * b` don't.
+var commentMarker = [
+  "(?:^|[^:])\\/\\/+!?", // //, ///, //! (but not the // in http://)
+  "\\/\\*+!?", // /*, /**
+  "(?:^|\\s)(?:#+|--|\\*+)", // #, ##, --, and * inside a block comment
+  "<!--",
+  "\\{\\{!(?:--)?", // {{! and {{!--
+  "\\{#",
+].join("|");
+
+// Groups: 1 keyword, 2 author, 3 colon, 4 message.
 Object.keys(messageChecks).forEach(function (checkName) {
   messageChecks[checkName].regex = new RegExp(
-    "(?:^|[^:])(\\/\\/|\\{\\{\\!|\\!|\\{\\#|\\*)(\\-\\-)?\\s*@?" +
-      checkName.toUpperCase() +
-      "\\b\\s*(?:\\(([^:]*)\\))*\\s*:?\\s*(.*)",
-    "i",
+    "(?:" + commentMarker + ")\\s*@?(" + checkName + ")\\b" +
+      "\\s*(?:\\(([^:)]*)\\))?\\s*(:)?\\s*(.*)",
+    "gi",
   );
 });
+
+/**
+ * An upper-case keyword is an annotation. Any other case needs a colon, so
+ * that comments like "* Note that..." or "// todo list" are not reported.
+ */
+function isAnnotation(matchResults) {
+  return (
+    matchResults[1] === matchResults[1].toUpperCase() ||
+    matchResults[3] === ":"
+  );
+}
 
 /**
  * Merges the user options over the defaults.
@@ -96,6 +119,7 @@ async function findFiles(options) {
         { withFileTypes: true },
       );
     } catch (err) {
+      if (!relativeDir) throw err; // The scan path itself is unreadable.
       console.warn("fixme: unable to read directory " + relativeDir + ": " + err.message);
       return;
     }
@@ -144,22 +168,22 @@ async function findFiles(options) {
 function retrieveMessagesFromLine(lineString, lineNumber, skip) {
   var messages = [];
 
-  commentEnds.forEach(function (commentEnd) {
-    lineString = lineString.replace(commentEnd, "");
-  });
-
   Object.keys(messageChecks).forEach(function (checkName) {
     if (skip && skip.indexOf(checkName) !== -1) return;
 
-    var matchResults = lineString.match(messageChecks[checkName].regex);
+    var matchResults = Array.from(
+      lineString.matchAll(messageChecks[checkName].regex),
+    ).find(isAnnotation);
 
     if (matchResults) {
+      var message = matchResults[4].replace(commentEnd, "").trim();
+
       messages.push({
         type: checkName,
         label: messageChecks[checkName].label,
         line_number: lineNumber,
-        author: matchResults[3] && matchResults[3].trim() ? matchResults[3].trim() : null,
-        message: matchResults[4] && matchResults[4].trim() ? matchResults[4].trim() : null,
+        author: matchResults[2] && matchResults[2].trim() ? matchResults[2].trim() : null,
+        message: message || null,
       });
     }
   });

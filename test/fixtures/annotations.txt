@@ -15,6 +15,6 @@ doSomething({ // NOTE: It doesn't need to be placed at line start!
 {{! HACK: Handlebars comments are supported }}
 {# FIXME: Twig comments are supported #}
 {{!-- XXX: Handlebars block comments are supported --}}
-// @todo lower case and an @ prefix still match
+// @todo: lower case with a colon and an @ prefix still match
 // NOTE(Jane Doe)  :   whitespace is trimmed
 // FIXME:

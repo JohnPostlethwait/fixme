@@ -141,16 +141,13 @@ gulp.task("notes", function () {
 
 A code annotation needs to follow these rules to be picked up by Fixme:
 
-- Can be preceeded by 0 to n number of characters, this includes the comment characters //, /\*, <!--, {{!, or {#
-- Must not have colon (:) before the comment character //
+- Must come right after a comment marker: `//`, `/*`, `#`, `--`, `<!--`, `{{!`, `{{!--`, `{#`, or `*` inside a block comment. Code can come before the comment.
+- `#`, `--` and `*` only count at the start of a line or after whitespace. `//` doesn't count after a colon, so URLs are not matched.
 - Must have one of the words: NOTE, OPTIMIZE, TODO, HACK, XXX, FIXME, or BUG
-- Can have an @ character before any of the above characters
-- Can have 0 to n space characters
-- Can have an author in parenthesis after the above word, and before a colon (:)
-- Can have 0 to n space characters
-- Must be followed by a colon (:)
-- Can have 0 to n space characters
-- Should have a message of 0 to n characters for the note
+- Can have an @ character before the word
+- Can have an author in parentheses after the word
+- The word must be upper case, or be followed by a colon. `// todo: x` and `// TODO x` are annotations, `// todo list` is not.
+- Can have a message after the word. It ends at the comment closer, if there is one on the line.
 
 #### Displaying Authors
 
